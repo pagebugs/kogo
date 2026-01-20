@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>터치애드 - 진료권 분석 인사이트</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT/fonts/variable/woff2/SUIT-Variable.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <div class="container dashboard-container">
+    
+    <!-- 1. Header -->
+    <header class="dashboard-header">
+      <div class="dashboard-title">
+        <h1>진료권 분석 인사이트</h1>
+        <div class="dashboard-subtitle">
+          <span class="dashboard-hospital-name" id="hospitalName">병원명</span> 주변 시장 데이터 분석
+        </div>
+      </div>
+      
+      <div class="dashboard-controls">
+        <div class="toggle-group">
+          <button class="toggle-btn active" data-mode="all">전체 기준</button>
+          <button class="toggle-btn" data-mode="age">연령 집중</button>
+          <button class="toggle-btn" data-mode="gender">성별 집중</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- 2. KPI Cards -->
+    <div class="kpi-grid">
+      <!-- Card 1: Potential User Scale -->
+      <div class="kpi-card" id="card-scale">
+        <div>
+          <div class="kpi-label">진료권 내 실제 소비 발생 규모</div>
+          <div class="kpi-value"><span id="val-scale">0</span><span class="kpi-unit">명</span></div>
+        </div>
+        <div class="kpi-subtext">최근 4주 · 카드 결제 기반</div>
+      </div>
+
+      <!-- Card 2: Age Target Precision -->
+      <div class="kpi-card" id="card-age">
+        <div>
+          <div class="kpi-label">30대 고객 비중</div>
+          <div class="kpi-value"><span id="val-age">0</span><span class="kpi-unit">%</span></div>
+        </div>
+        <div class="kpi-subtext">핵심 타겟 집중도</div>
+      </div>
+
+      <!-- Card 3: Gender Concentration -->
+      <div class="kpi-card" id="card-gender">
+        <div>
+          <div class="kpi-label">여성 고객 비중</div>
+          <div class="kpi-value"><span id="val-gender">0</span><span class="kpi-unit">%</span></div>
+        </div>
+        <div class="kpi-subtext">성별 데이터 기반</div>
+      </div>
+
+      <!-- Card 4: Reliability (Fixed) -->
+      <div class="kpi-card" style="background-color: var(--color-black); color: var(--color-white); border-color: var(--color-black);">
+        <div>
+          <div class="kpi-label" style="color: rgba(255,255,255,0.7);">데이터 출처</div>
+          <div style="font-size: var(--font-base); font-weight: 500; line-height: 1.4;">
+            실제 카드 결제<br>
+            & 교통 이용 데이터<br>
+            기반 분석
+          </div>
+        </div>
+        <div class="kpi-subtext" style="color: rgba(255,255,255,0.4);">Verified Data</div>
+      </div>
+    </div>
+
+    <!-- 3. Main Content (Chart & Radius) -->
+    <div class="content-grid">
+      <!-- Chart Section -->
+      <div class="chart-section">
+        <div class="chart-header">
+          <div class="chart-title">타겟 유저 구성비</div>
+        </div>
+        <div class="chart-container">
+          <canvas id="insightChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Radius Control Panel -->
+      <div class="radius-panel">
+        <div class="radius-title">반경 시뮬레이션</div>
+        
+        <div class="radius-slider-container">
+          <div class="radius-labels">
+            <span>500m</span>
+            <span>700m</span>
+            <span>1km</span>
+          </div>
+          <input type="range" min="0" max="2" value="2" step="1" class="radius-range" id="radiusSlider">
+        </div>
+
+        <div class="radius-value-display">
+          <div class="current-radius" id="radiusDisplay">1km</div>
+          <div class="radius-desc">반경 내 도달 가능 잠재 고객</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="data-source-note">
+      * 본 데이터는 터치애드 파트너사의 비식별화된 결제 데이터를 가공하여 제공됩니다.
+    </div>
+
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Load Data from LocalStorage
+      const storedData = localStorage.getItem('touchadData');
+      
+      if (!storedData) {
+        alert('분석 데이터가 없습니다. 메인 페이지로 이동합니다.');
+        // location.href = 'index.html'; // 개발 중 주석 처리
+        // 더미 데이터 (개발용)
+        console.warn('[DEV] No localStorage data found. Using dummy data.');
+      }
+
+      // Default dummy data structure matching the user's description
+      // resData[0]: Total, resData[1]: Age(30s), resData[2]: Gender(Female)
+      let data = storedData ? JSON.parse(storedData) : {
+        hospitalName: "테스트 병원",
+        resData: [
+          { target: 12500 }, // Total
+          { target: 4500 },  // 30s
+          { target: 8200 }   // Female
+        ]
+      };
+
+      const resData = data.resData || [];
+      const baseTotal = resData[0]?.target || 0;
+      const baseAge = resData[1]?.target || 0;
+      const baseGender = resData[2]?.target || 0;
+
+      // Hospital Name
+      document.getElementById('hospitalName').textContent = data.hospitalName || "체험 병원";
+
+      // Elements
+      const valScale = document.getElementById('val-scale');
+      const valAge = document.getElementById('val-age');
+      const valGender = document.getElementById('val-gender');
+      
+      const cardScale = document.getElementById('card-scale');
+      const cardAge = document.getElementById('card-age');
+      const cardGender = document.getElementById('card-gender');
+
+      const radiusSlider = document.getElementById('radiusSlider');
+      const radiusDisplay = document.getElementById('radiusDisplay');
+      const toggleBtns = document.querySelectorAll('.toggle-btn');
+      
+      // State
+      let currentRadiusIdx = 2; // 0: 500m, 1: 700m, 2: 1km
+      let currentMode = 'all'; // all, age, gender
+
+      const radiusConfig = [
+        { label: '500m', multiplier: 0.6 },
+        { label: '700m', multiplier: 0.8 },
+        { label: '1km', multiplier: 1.0 }
+      ];
+
+      // Chart
+      let chartInstance = null;
+      const ctx = document.getElementById('insightChart').getContext('2d');
+
+      function initChart() {
+        chartInstance = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: ['전체 잠재 고객', '30대 핵심 타겟', '여성 고객'],
+            datasets: [{
+              label: '유저 수',
+              data: [baseTotal, baseAge, baseGender],
+              backgroundColor: [
+                'rgba(0, 0, 0, 0.2)', // Total - gray
+                'rgba(0, 0, 0, 0.2)', // Age - gray
+                'rgba(0, 0, 0, 0.2)'  // Gender - gray
+              ],
+              borderColor: [
+                'rgba(0, 0, 0, 1)',
+                'rgba(0, 0, 0, 1)',
+                'rgba(0, 0, 0, 1)'
+              ],
+              borderWidth: 1,
+              borderRadius: 4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: 'rgba(0,0,0,0.8)',
+                padding: 12,
+                titleFont: { family: 'SUIT', size: 14 },
+                bodyFont: { family: 'SUIT', size: 14 }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: {
+                  color: 'rgba(0,0,0,0.05)'
+                },
+                ticks: {
+                  font: { family: 'SUIT' }
+                }
+              },
+              x: {
+                grid: { display: false },
+                ticks: {
+                  font: { family: 'SUIT', weight: '600' }
+                }
+              }
+            },
+            animation: {
+              duration: 500 // Minimal animation
+            }
+          }
+        });
+      }
+
+      // Render Function
+      function render() {
+        // 1. Calculate Values based on Radius
+        const multiplier = radiusConfig[currentRadiusIdx].multiplier;
+        const currentTotal = Math.round(baseTotal * multiplier);
+        const currentAge = Math.round(baseAge * multiplier);
+        const currentGender = Math.round(baseGender * multiplier);
+
+        // 2. Update KPI Cards
+        // Formatting numbers with commas
+        valScale.textContent = currentTotal.toLocaleString();
+        
+        // Percentages (Fixed base or dynamic? "Precision" usually implies ratio within the population)
+        // If we want precision to remain constant across radius (assumption: distribution is uniform)
+        // Then we calculate ratio from the simulated values (which are just scaled base values, so ratio is same)
+        // Or we can simulate non-uniformity, but requirement said: "500m -> target * 0.6". 
+        // Just scaling the counts preserves the ratio.
+        const pctAge = ((currentAge / currentTotal) * 100).toFixed(1);
+        const pctGender = ((currentGender / currentTotal) * 100).toFixed(1);
+
+        valAge.textContent = pctAge;
+        valGender.textContent = pctGender;
+
+        // 3. Highlight Logic (Analysis Criteria)
+        // Reset highlights
+        cardScale.classList.remove('highlight');
+        cardAge.classList.remove('highlight');
+        cardGender.classList.remove('highlight');
+        
+        // Reset Chart Colors
+        const defaultColor = 'rgba(0, 0, 0, 0.1)';
+        const activeColor = 'rgba(0, 0, 0, 0.8)';
+        let bgColors = [defaultColor, defaultColor, defaultColor];
+
+        if (currentMode === 'all') {
+          cardScale.classList.add('highlight');
+          bgColors[0] = activeColor;
+        } else if (currentMode === 'age') {
+          cardAge.classList.add('highlight');
+          bgColors[1] = activeColor;
+        } else if (currentMode === 'gender') {
+          cardGender.classList.add('highlight');
+          bgColors[2] = activeColor;
+        }
+
+        // 4. Update Chart
+        if (chartInstance) {
+          chartInstance.data.datasets[0].data = [currentTotal, currentAge, currentGender];
+          chartInstance.data.datasets[0].backgroundColor = bgColors;
+          chartInstance.update();
+        }
+
+        // 5. Update Radius Display
+        radiusDisplay.textContent = radiusConfig[currentRadiusIdx].label;
+      }
+
+      // Initialize
+      initChart();
+      render();
+
+      // Event Listeners
+      
+      // Radius Slider
+      radiusSlider.addEventListener('input', (e) => {
+        currentRadiusIdx = parseInt(e.target.value);
+        render();
+      });
+
+      // Toogle Buttons
+      toggleBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          // Remove active class from all
+          toggleBtns.forEach(b => b.classList.remove('active'));
+          // Add active to clicked
+          e.target.classList.add('active');
+          // Set mode
+          currentMode = e.target.dataset.mode;
+          render();
+        });
+      });
+
+    });
+  </script>
+</body>
+</html>

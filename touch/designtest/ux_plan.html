@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tentative UX Plan - Visualization</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Noto+Sans+KR:wght@300;400;700;900&display=swap" rel="stylesheet">
+    
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #050505;
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --accent: #3b82f6; /* Trust Blue */
+            --spacing-unit: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Inter', 'Noto Sans KR', sans-serif;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Utility */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        
+        .vh-100 { height: 100vh; }
+        .flex-center { display: flex; justify-content: center; align-items: center; }
+        .col-flex { display: flex; flex-direction: column; }
+        
+        /* Typography */
+        h1, h2, h3 { font-weight: 800; letter-spacing: -0.02em; }
+        .display-text { font-size: clamp(3rem, 5vw, 6rem); line-height: 1.1; }
+        .section-title { font-size: clamp(2rem, 3vw, 4rem); margin-bottom: 2rem; color: var(--text-muted); }
+        .lead { font-size: 1.5rem; color: var(--text-muted); line-height: 1.6; max-width: 600px; }
+
+        /* UX Annotation */
+        .ux-note {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem;
+            border-left: 2px solid var(--accent);
+            font-size: 0.8rem;
+            max-width: 250px;
+            z-index: 9999;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        /* SECTIONS */
+
+        /* 1. Hero - Frictionless Hook */
+        #hero {
+            position: relative;
+        }
+        .hero-content {
+            text-align: center;
+            opacity: 0; /* JS will handle entry */
+            transform: scale(0.95);
+        }
+        .hero-sub {
+            margin-top: 2rem;
+            font-weight: 300;
+            opacity: 0.8;
+        }
+
+        /* 2. Proof - Motion Data */
+        #proof {
+            background: linear-gradient(180deg, var(--bg-color) 0%, #111 100%);
+            height: 80vh; /* Not full screen to encourage scroll */
+        }
+        .metric-container {
+            display: flex;
+            gap: 4rem;
+            justify-content: space-around;
+            width: 100%;
+        }
+        .metric-item {
+            text-align: center;
+        }
+        .metric-value {
+            font-size: 5rem;
+            font-weight: 700;
+            display: block;
+            background: linear-gradient(to right, #fff, #888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .metric-label {
+            color: var(--text-muted);
+            margin-top: 1rem;
+        }
+
+        /* 3. Objection Handling - Sequential Scroll */
+        #objections {
+            height: 300vh; /* Long scroll area */
+            position: relative;
+        }
+        .objection-wrapper {
+            height: 100vh;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            overflow: hidden;
+            background-color: #000;
+        }
+        .objection-card {
+            position: absolute;
+            text-align: center;
+            max-width: 800px;
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        .objection-q {
+            font-size: 2.5rem;
+            color: #ff6b6b;
+            margin-bottom: 1.5rem;
+        }
+        .objection-a {
+            font-size: 1.8rem;
+            color: #fff;
+        }
+
+        /* 4. Commitment - CTA */
+        #cta {
+            background-color: #0a0a0a;
+            text-align: center;
+        }
+        .cta-box {
+            border: 1px solid #333;
+            padding: 4rem;
+            border-radius: 20px;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #050505 100%);
+        }
+        .soft-btn {
+            margin-top: 3rem;
+            padding: 1.5rem 3rem;
+            font-size: 1.5rem;
+            background: var(--text-main);
+            color: #000;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: 600;
+        }
+        .soft-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+        }
+        .soft-btn-sub {
+            display: block;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: #666;
+            text-decoration: underline;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="ux-note">
+        <strong>UX Hypothesis:</strong><br>
+        <span id="ux-status">Wait for load...</span>
+    </div>
+
+    <!-- 1. HERO -->
+    <!-- Goal: Immediate Authority & Curiosity without complexity -->
+    <section id="hero" class="vh-100 flex-center">
+        <div class="container hero-content">
+            <h1 class="display-text">Stop Optimized Waste.<br>Start Predicted Growth.</h1>
+            <p class="lead hero-sub">UX is not decoration. It's a conversion mechanism.</p>
+        </div>
+    </section>
+
+    <!-- 2. PROOF -->
+    <!-- Goal: Visualize impact dynamically, breaking the static 'card' mental model -->
+    <section id="proof" class="flex-center col-flex">
+        <div class="container">
+            <h2 class="section-title">The Math of Commitment</h2>
+            <div class="metric-container">
+                <div class="metric-item">
+                    <span class="metric-value">0.2s</span>
+                    <span class="metric-label">Decision Speed</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-value">+40%</span>
+                    <span class="metric-label">Conversion Uplift</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-value">Active</span>
+                    <span class="metric-label">Optimization Status</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. OBJECTIONS -->
+    <!-- Goal: Address internal doubts sequentially before they become blockers -->
+    <section id="objections">
+        <div class="objection-wrapper">
+            <div class="objection-card" id="obj-1">
+                <h3 class="objection-q">"Is this just another pretty interface?"</h3>
+                <p class="objection-a">NO. We engineer user behavior, not just pixels.<br>Your current design is leaking revenue.</p>
+            </div>
+            <div class="objection-card" id="obj-2">
+                <h3 class="objection-q">"Will it work for our complex B2B product?"</h3>
+                <p class="objection-a">YES. High-consideration sales require<br>structured persuasion, not impulsive clicks.</p>
+            </div>
+            <div class="objection-card" id="obj-3">
+                <h3 class="objection-q">"Is it expensive?"</h3>
+                <p class="objection-a">The cost of inaction is higher.<br>You are losing potential leads every minute.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. CTA -->
+    <!-- Goal: Low-friction next step (Micro-commitment) -->
+    <section id="cta" class="vh-100 flex-center">
+        <div class="container">
+            <div class="cta-box">
+                <h2 class="display-text">Ready to Audit?</h2>
+                <p class="lead" style="margin: 2rem auto;">Stop guessing. Let data dictate your design.</p>
+                <button class="soft-btn">Start Diagnosis</button>
+                <span class="soft-btn-sub">No credit card required • Immediate Insight</span>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        // UX Note Updater
+        function updateNote(text) {
+            document.getElementById('ux-status').innerText = text;
+        }
+
+        // 1. Hero Animation
+        // Intent: 'Frictionless Hook' - appear smoothly to reduce cognitive load
+        const heroTl = gsap.timeline();
+        heroTl.to(".hero-content", {
+            duration: 1.5,
+            opacity: 1,
+            scale: 1,
+            ease: "power3.out",
+            onStart: () => updateNote("Hero: Single focused message to anchor attention.")
+        });
+
+        // 2. Proof Animation
+        // Intent: Showing data 'alive' implies active results vs static reports
+        gsap.from(".metric-item", {
+            scrollTrigger: {
+                trigger: "#proof",
+                start: "top 70%",
+                toggleActions: "play none none reverse",
+                onEnter: () => updateNote("Proof: 'Alive' numbers suggest active optimization.")
+            },
+            y: 50,
+            opacity: 0,
+            duration: 1,
+            stagger: 0.2,
+            ease: "back.out(1.7)"
+        });
+
+        // 3. Objection Sequence
+        // Intent: Scroll-driven storytelling forces the user to confront and resolve doubts one by one
+        const objectionTl = gsap.timeline({
+            scrollTrigger: {
+                trigger: "#objections",
+                start: "top top",
+                end: "+=2000", /* Scroll distance */
+                scrub: true,
+                pin: true,
+                onEnter: () => updateNote("Objection: Pre-empting fears before the price conversation.")
+            }
+        });
+
+        // Step 1: Show first, hide others
+        objectionTl
+            .to("#obj-1", { opacity: 1, y: 0, duration: 1 })
+            .to("#obj-1", { opacity: 0, y: -50, duration: 1, delay: 1 }) // Exit 1
+            
+            .to("#obj-2", { opacity: 1, y: 0, duration: 1 }) // Enter 2
+            .to("#obj-2", { opacity: 0, y: -50, duration: 1, delay: 1 }) // Exit 2
+            
+            .to("#obj-3", { opacity: 1, y: 0, duration: 1 }) // Enter 3
+            .to("#obj-3", { opacity: 0, y: -50, duration: 1, delay: 1 }); // Exit 3
+
+        // 4. CTA Reveal
+        gsap.from(".cta-box", {
+            scrollTrigger: {
+                trigger: "#cta",
+                start: "top 60%",
+                onEnter: () => updateNote("CTA: Low-friction commitment (Start vs Buy).")
+            },
+            scale: 0.9,
+            opacity: 0,
+            duration: 1,
+            ease: "power2.out"
+        });
+
+    </script>
+</body>
+</html>

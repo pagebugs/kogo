@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>터치애드 - 시장 분석 인사이트</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT/fonts/variable/woff2/SUIT-Variable.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/insight.css">
+  <link rel="stylesheet" href="../assets/css/gnb.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- CONFIG JS (API Key 등) -->
+  <script src="../assets/js/config.js"></script>
+</head>
+<body class="has-gnb">
+
+<!-- =========================================================
+<!-- HEADER (Loaded Dynamically) -->
+<div id="include-header"></div>
+
+  <div class="container dashboard-container">
+    
+    <!-- 1. Header: Context & Authority -->
+    <header class="insight-header">
+      <div class="insight-title-group">
+        <h1>Market Intelligence</h1>
+        <div class="insight-meta">
+          <span class="hospital-badge" id="hospitalName">병원명</span>
+          <span>진료권 시장 규모 및 타겟 집중도 분석</span>
+        </div>
+      </div>
+      <div>
+        <span class="text-small text-muted" id="currentDate">2026.01.15 기준</span>
+      </div>
+    </header>
+
+    <!-- 2. KPI Cards: The "Ah-ha" Moment (재해석됨) -->
+    <div class="kpi-row">
+      <!-- KPI 1: Scale (Market Activity Index) -->
+      <div class="kpi-card active" id="card-scale">
+        <div>
+          <div class="kpi-label">원장님을 모르는 잠재 환자</div>
+          <div class="kpi-value-group">
+            <span class="kpi-value" id="val-scale">0</span>
+            <span class="kpi-unit">명</span>
+          </div>
+        </div>
+        <div class="kpi-desc">지금 이 순간에도 경쟁 병원을 찾고 있습니다</div>
+      </div>
+
+      <!-- KPI 2: Precision (Core Target Density) -->
+      <div class="kpi-card" id="card-precision">
+        <div>
+          <div class="kpi-label">30대 핵심층 비중</div>
+          <div class="kpi-value-group">
+            <span class="kpi-value" id="val-precision">0</span>
+            <span class="kpi-unit">%</span>
+          </div>
+        </div>
+        <div class="kpi-desc">성형/피부 시술 최다 소비 연령대</div>
+      </div>
+
+      <!-- KPI 3: Relevance (Category Fit) -->
+      <div class="kpi-card" id="card-relevance">
+        <div>
+          <div class="kpi-label">여성 고객 점유율</div>
+          <div class="kpi-value-group">
+            <span class="kpi-value" id="val-relevance">0</span>
+            <span class="kpi-unit">%</span>
+          </div>
+        </div>
+        <div class="kpi-desc">뷰티·건강 소비 주도층</div>
+      </div>
+
+      <!-- KPI 4: Reliability (Data Source) -->
+      <div class="kpi-card info-card">
+        <div>
+          <div class="kpi-label">데이터 신뢰도 검증</div>
+          <div class="kpi-value">Verified<br>Real Data</div>
+        </div>
+        <div class="kpi-desc">금융권 결제 데이터 기반<br>실시간 분석 완료</div>
+      </div>
+    </div>
+
+    <!-- 3. Insight Box (New) -->
+    <div class="insight-box-row">
+      <div class="insight-icon">💡</div>
+      <div class="insight-text">
+        "이 지역의 30대 여성 비중은 전국 평균 대비 <span style="color:var(--color-black); font-weight:700;">1.4배</span>입니다. 
+        성형/피부과에 최적화된 고관여 시장입니다."
+      </div>
+    </div>
+
+    <!-- 4. Dashboard Body: Interactive Analysis -->
+    <div class="dashboard-body">
+      
+      <!-- Left: Visualization (Chart Panel) -->
+      <div class="chart-panel">
+        <div class="panel-header">
+          <div class="panel-title">타겟 세그먼트 구성</div>
+        </div>
+        
+        <div class="viz-container">
+          <!-- 1. Map (Always Top) -->
+          <div class="map-section" id="view-map">
+            <div id="kakaoMap"></div>
+          </div>
+
+          <!-- 2. Chart (Always Bottom) -->
+          <div class="chart-section-wrapper" id="view-chart">
+            <canvas id="mainChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Simulator Controls & Opportunity -->
+      <div class="control-panel">
+        
+        <!-- Radius Simulation -->
+        <div class="control-card">
+          <div class="control-title">
+            <span>반경 시뮬레이션</span>
+          </div>
+          <div class="radius-slider-wrapper">
+            <div class="radius-track-labels">
+              <span>500m</span>
+              <span>700m</span>
+              <span>1km</span>
+            </div>
+            <input type="range" class="radius-input" min="0" max="2" step="1" value="2" id="radiusSlider">
+          </div>
+          
+          <div class="radius-feedback">
+            <span class="radius-current" id="radiusDisplay">1km</span>
+            <span class="radius-context">도보 15분 내외 진료권</span>
+          </div>
+        </div>
+
+        <!-- Opportunity Alert (New) -->
+        <div class="alert-box">
+          <div class="alert-title">
+            <span>⚡ Opportunity Alert</span>
+          </div>
+          <div class="alert-desc">
+            이 <strong id="alert-target-count">12,500</strong>명 중 원장님 병원을 아는 사람은 몇 명일까요?<br><br>
+            터치애드는 <strong>클릭당 50원</strong>으로 이들에게 도달합니다.<br>
+            (기존 키워드 광고 대비 1/14 비용)
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- =========================================================
+         FOOTER (Loaded Dynamically)
+    ========================================================= -->
+    <div id="include-footer"></div>
+
+  </div>
+
+  <!-- Common Scripts -->
+  <script src="../assets/js/gnb.js"></script>
+  <script src="../assets/js/ui-loader.js"></script>
+
+  <!-- Sticky CTA Bar (New) -->
+  <div class="sticky-cta-bar">
+    <div class="cta-container">
+      <div class="cta-message">
+        <strong id="sticky-target-count">12,000</strong>명의 잠재 환자에게 먼저 닿으세요.
+      </div>
+      <div class="cta-buttons">
+        <a href="#" class="cta-btn cta-btn-secondary" onclick="alert('준비 중입니다.')">상세 리포트 받기</a>
+        <a href="#" class="cta-btn cta-btn-primary" onclick="alert('무료 상담 신청이 접수되었습니다.')">무료 상담 신청</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // -------------------------------------------------------
+      // 1. Data Loading & Initialization
+      // -------------------------------------------------------
+      const storedData = localStorage.getItem('touchadData');
+      
+      // Fallback for direct access without data (Dev Mode)
+      // resData[0]: Overall, resData[1]: 30s, resData[2]: Female
+      const defaultData = {
+        hospitalName: "체험 병원",
+        resData: [
+          { target: 12500 }, // Total
+          { target: 4500 },  // 30s
+          { target: 8200 }   // Female
+        ]
+      };
+
+      const data = storedData ? JSON.parse(storedData) : defaultData;
+      
+      // Values (실제 API 응답 구조에 맞게 매핑 필요)
+      // 현재 런컴 구조: [{dunjugo: 12500}, {dunjugo: 4500}, ...] 형태일 수도 있음
+      // index.html에서의 저장 로직을 보면 dunjugoValues 배열도 저장함
+      
+      // 로컬스토리지 구조 확인 (index.html 참고)
+      // dunjugoValues: [{index:1, value: ...}, {index:2, value: ...}, ...]
+      
+      let baseTotal = 0;
+      let baseAge = 0;
+      let baseGender = 0;
+
+      if (data.dunjugoValues && data.dunjugoValues.length > 0) {
+          // dunjugoValues[0] -> Total
+          // dunjugoValues[1] -> Age (30s)
+          // dunjugoValues[2] -> Gender (Female)
+          baseTotal = data.dunjugoValues[0]?.value || 12500;
+          baseAge = data.dunjugoValues[1]?.value || 4500;
+          baseGender = data.dunjugoValues[2]?.value || 8200;
+      } else if (data.resData && data.resData.length > 0) {
+          // Fallback to resData direct access if structure differs
+           baseTotal = data.resData[0]?.dunjugo || data.resData[0]?.target || 12500;
+           baseAge = data.resData[1]?.dunjugo || data.resData[1]?.target || 4500;
+           baseGender = data.resData[2]?.dunjugo || data.resData[2]?.target || 8200;
+      } else {
+           // Complete fallback
+           baseTotal = 12500;
+           baseAge = 4500;
+           baseGender = 8200;
+      }
+
+      // UI References
+      const elHospitalName = document.getElementById('hospitalName');
+      const elDate = document.getElementById('currentDate');
+      
+      // KPIs
+      const elValScale = document.getElementById('val-scale');
+      const elValPrecision = document.getElementById('val-precision');
+      const elValRelevance = document.getElementById('val-relevance');
+      
+      // Alerts
+      const elAlertTargetCount = document.getElementById('alert-target-count');
+      const elStickyTargetCount = document.getElementById('sticky-target-count');
+
+      // Slider
+      const elRadiusSlider = document.getElementById('radiusSlider');
+      const elRadiusDisplay = document.getElementById('radiusDisplay');
+
+      // Set Metadata
+      elHospitalName.textContent = data.hospitalName || "체험 병원";
+      const today = new Date();
+      elDate.textContent = `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2, '0')}.${String(today.getDate()).padStart(2, '0')} 기준`;
+
+      // Simulation Config
+      const radiusConfig = [
+        { label: '500m', multiplier: 0.6, desc: '도보 7분 내외 핵심 상권' },
+        { label: '700m', multiplier: 0.8, desc: '도보 10분 내외 확장 상권' },
+        { label: '1km', multiplier: 1.0, desc: '도보 15분 내외 전체 진료권' }
+      ];
+
+      let currentRadiusIndex = 2;
+
+      // Chart
+      let chartInstance = null;
+      const ctx = document.getElementById('mainChart').getContext('2d');
+
+      // Map & Heatmap
+      let map = null;
+      let isMapLoaded = false;
+      // Default Coords (Gangnam) - 실제로는 주소 기반이나, 여기서는 고정값 사용 (데모)
+      // Kakao API가 없으면 에러 메시지를 띄우는 로직은 유지
+      const GANGNAM_COORDS = { lat: 37.517316, lng: 127.047466 }; 
+
+      // -------------------------------------------------------
+      // 2. Logic & Rendering
+      // -------------------------------------------------------
+      
+      function initChart() {
+        Chart.defaults.font.family = 'SUIT';
+        Chart.defaults.color = '#666';
+
+        chartInstance = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: ['잠재 환자', '여성 고객', '30대 타겟'],
+            datasets: [{
+              label: '유저 수',
+              data: [0, 0, 0], // Initial empty
+              backgroundColor: [
+                'rgba(0, 0, 0, 0.8)',   // Black
+                'rgba(100, 100, 100, 0.6)', // Gray
+                'rgba(200, 200, 200, 0.4)'  // Light Gray
+              ],
+              borderWidth: 0,
+              borderRadius: 4,
+              barPercentage: 0.6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: 'rgba(0,0,0,0.9)',
+                padding: 12,
+                cornerRadius: 4,
+                titleFont: { family: 'SUIT' },
+                bodyFont: { family: 'SUIT' }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: { color: '#f0f0f0' },
+                border: { display: false }
+              },
+              x: {
+                grid: { display: false },
+                border: { display: false }
+              }
+            },
+            animation: { duration: 600, easing: 'easeOutQuart' }
+          }
+        });
+      }
+
+      function updateDashboard() {
+        // 1. Calculate Multiplier
+        const config = radiusConfig[currentRadiusIndex];
+        const multiplier = config.multiplier;
+
+        // 2. Compute Simulated Values
+        const currentTotal = Math.round(baseTotal * multiplier);
+        const currentGender = Math.round(baseGender * multiplier); 
+        const currentAge = Math.round(baseAge * multiplier);       
+
+        // 3. Update KPIs
+        animateValue(elValScale, parseInt(elValScale.textContent.replace(/,/g, '') || 0), currentTotal, 500);
+        
+        // Percentages
+        const precision = currentTotal > 0 ? ((currentAge / currentTotal) * 100).toFixed(1) : 0;
+        elValPrecision.textContent = precision;
+
+        const relevance = currentTotal > 0 ? ((currentGender / currentTotal) * 100).toFixed(1) : 0;
+        elValRelevance.textContent = relevance;
+        
+        // Update Alerts
+        if(elAlertTargetCount) elAlertTargetCount.textContent = currentTotal.toLocaleString();
+        if(elStickyTargetCount) elStickyTargetCount.textContent = currentTotal.toLocaleString();
+
+        // 4. Update Slider Feedback
+        elRadiusDisplay.textContent = config.label;
+        document.querySelector('.radius-context').textContent = config.desc;
+
+        // 5. Update Chart
+        if (chartInstance) {
+          chartInstance.data.datasets[0].data = [currentTotal, currentGender, currentAge];
+          chartInstance.update();
+        }
+
+        // 6. Update Map (if loaded)
+        if (map) {
+          updateHeatmapLevel(currentRadiusIndex);
+        }
+      }
+
+      function animateValue(obj, start, end, duration) {
+        if (!obj) return;
+        let startTimestamp = null;
+        const step = (timestamp) => {
+          if (!startTimestamp) startTimestamp = timestamp;
+          const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+          const value = Math.floor(progress * (end - start) + start);
+          obj.textContent = value.toLocaleString();
+          if (progress < 1) {
+            window.requestAnimationFrame(step);
+          }
+        };
+        window.requestAnimationFrame(step);
+      }
+
+      // -------------------------------------------------------
+      // 3. Map Implementation
+      // -------------------------------------------------------
+      function loadKakaoMap() {
+        // Kakao Map Key Check
+        if (typeof TOUCH_CONFIG === 'undefined' || !TOUCH_CONFIG.KAKAO_API_KEY) {
+          showMapError("지도 데이터를 불러올 수 없습니다.");
+          return;
+        }
+
+        const script = document.createElement("script");
+        script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${TOUCH_CONFIG.KAKAO_API_KEY}&libraries=services&autoload=false`;
+        
+        script.onload = () => {
+          kakao.maps.load(() => {
+            initMap();
+          });
+        };
+        
+        script.onerror = () => {
+          showMapError("지도 연결에 실패했습니다.");
+        };
+
+        document.head.appendChild(script);
+      }
+
+      function showMapError(msg) {
+        const container = document.getElementById('kakaoMap');
+        if (container) {
+          container.innerHTML = `
+            <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:100%; background:#f5f5f5; color:#999; text-align:center;">
+              <div style="font-size:24px; margin-bottom:10px;">⚠️</div>
+              <div style="font-size:14px; font-weight:500;">${msg}</div>
+            </div>
+          `;
+        }
+      }
+
+      function initMap() {
+        const container = document.getElementById('kakaoMap');
+        const options = {
+          center: new kakao.maps.LatLng(GANGNAM_COORDS.lat, GANGNAM_COORDS.lng),
+          level: 4
+        };
+
+        map = new kakao.maps.Map(container, options);
+        isMapLoaded = true;
+
+        // Geocoder for Address Search if stored address exists
+        const storedAddress = localStorage.getItem('address-base');
+        
+        if (storedAddress) {
+          const geocoder = new kakao.maps.services.Geocoder();
+          geocoder.addressSearch(storedAddress, function(result, status) {
+            if (status === kakao.maps.services.Status.OK) {
+              const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+              map.setCenter(coords);
+              
+              // Marker with custom style (if possible) or default
+              new kakao.maps.Marker({
+                map: map,
+                position: coords
+              });
+              
+              // Add Circle to visualize radius (Optional)
+              // ...
+            }
+          });
+        } else {
+             // Default Market
+             new kakao.maps.Marker({
+                map: map,
+                position: new kakao.maps.LatLng(GANGNAM_COORDS.lat, GANGNAM_COORDS.lng)
+              });
+        }
+      }
+
+      function updateHeatmapLevel(radiusIdx) {
+        if (!map) return;
+        const zoomLevels = [3, 4, 5]; 
+        const targetLevel = zoomLevels[radiusIdx];
+        map.setLevel(targetLevel, {animate: true});
+      }
+
+      // -------------------------------------------------------
+      // 4. Interaction Wiring
+      // -------------------------------------------------------
+      
+      initChart();
+      updateDashboard();
+      
+      // Load Map slightly delayed to ensure DOM
+      setTimeout(loadKakaoMap, 100);
+
+      // Slider
+      elRadiusSlider?.addEventListener('input', (e) => {
+        currentRadiusIndex = parseInt(e.target.value);
+        updateDashboard();
+      });
+
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <div class="nav-container">
+
+      <div class="logo-dummy"></div>
+
+      <nav class="nav">
+        <ul class="nav-list">
+          <li class="nav-item" data-type="link">
+            <button class="nav-button" onclick="location.href='index.html'">Overview</button>
+          </li>
+          <li class="nav-item" data-type="dropdown">
+            <button class="nav-button" aria-expanded="false" data-panel="usecases">
+              Use Cases <i class="material-icons caret">keyboard_arrow_down</i>
+            </button>
+          </li>
+          <li class="nav-item" data-type="dropdown">
+            <button class="nav-button" aria-expanded="false" data-panel="products">
+              Products <i class="material-icons caret">keyboard_arrow_down</i>
+            </button>
+          </li>
+          <li class="nav-item" data-type="dropdown">
+            <button class="nav-button" aria-expanded="false" data-panel="resources">
+              Resources <i class="material-icons caret">keyboard_arrow_down</i>
+            </button>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="download-dummy"></div>
+      <button class="mobile-toggle" id="mobileToggle">☰</button>
+
+    </div>
+  </div>
+</header>
+
+<!-- MEGA PANELS -->
+<div class="mega-dropdown layout-a" data-panel="usecases">
+  <div class="mega-inner">
+    <div class="mega-left">
+      <h3 class="mega-title">Everything you need to stay up-to-date</h3>
+      <p class="mega-desc">Documentation, changelog, support and more.</p>
+    </div>
+    <div class="mega-right">
+      <button class="mega-item">Documentation <i class="material-icons arrow">keyboard_arrow_right</i></button>
+      <button class="mega-item">Changelog <i class="material-icons arrow">keyboard_arrow_right</i></button>
+      <button class="mega-item">Support <i class="material-icons arrow">keyboard_arrow_right</i></button>
+    </div>
+  </div>
+</div>
+
+<div class="mega-dropdown layout-b" data-panel="products">
+  <div class="mega-inner">
+    <div class="mega-col">
+      <h4 class="mega-col-title">AI Products</h4>
+      <button class="mega-item">CT → MRI AI</button>
+      <button class="mega-item">Spine Diagnostics</button>
+      <button class="mega-item">Cardio Screening</button>
+    </div>
+    <div class="mega-col">
+      <h4 class="mega-col-title">Platforms</h4>
+      <button class="mega-item">KOGHA Cloud</button>
+      <button class="mega-item">TouchAd</button>
+      <button class="mega-item">DocQ-Mentoring</button>
+    </div>
+    <div class="mega-col">
+      <h4 class="mega-col-title">Developer</h4>
+      <button class="mega-item">API Docs</button>
+      <button class="mega-item">SDK Downloads</button>
+      <button class="mega-item">Case Library</button>
+    </div>
+  </div>
+</div>
+
+<div class="mega-dropdown layout-c" data-panel="resources">
+  <div class="mega-inner">
+    <div class="mega-resource">
+      <div class="mega-icon"></div>
+      <div class="mega-text">
+        <h4>Tutorials</h4>
+        <p>Video walkthroughs and hands-on guides.</p>
+      </div>
+    </div>
+    <div class="mega-resource">
+      <div class="mega-icon"></div>
+      <div class="mega-text">
+        <h4>Community</h4>
+        <p>Join our forum and share insights.</p>
+      </div>
+    </div>
+    <div class="mega-resource">
+      <div class="mega-icon"></div>
+      <div class="mega-text">
+        <h4>Research</h4>
+        <p>Latest whitepapers and deep-dive reports.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-item" onclick="location.href='index.html'">Overview</button>
+  <div class="mobile-accordion" data-panel="usecases">
+    <div class="mobile-accordion-title">Use Cases ▼</div>
+    <div class="mobile-accordion-body">
+      <button>Documentation</button>
+      <button>Changelog</button>
+      <button>Support</button>
+    </div>
+  </div>
+  <div class="mobile-accordion" data-panel="products">
+    <div class="mobile-accordion-title">Products ▼</div>
+    <div class="mobile-accordion-body">
+      <button>AI Products</button>
+      <button>Platforms</button>
+      <button>Developer</button>
+    </div>
+  </div>
+  <div class="mobile-accordion" data-panel="resources">
+    <div class="mobile-accordion-title">Resources ▼</div>
+    <div class="mobile-accordion-body">
+      <button>Tutorials</button>
+      <button>Community</button>
+      <button>Research</button>
+    </div>
+  </div>
+</div>

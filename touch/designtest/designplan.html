@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>터치애드 UX 설계 시안 (Design Plan)</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT/fonts/variable/woff2/SUIT-Variable.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- GSAP for scroll-based narrative -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <style>
+        /* ========================================
+           디자인 토큰 (Design Tokens)
+           ======================================== */
+        :root {
+            /* Colors - 터치애드 브랜드 정체성 */
+            --color-bg-primary: #0a0a0a;
+            --color-bg-secondary: #151515;
+            --color-text-primary: #ffffff;
+            --color-text-secondary: #a0a0a0;
+            --color-accent: #3b82f6;
+            --color-accent-hover: #2563eb;
+            --color-trust: #10b981;
+            --color-caution: #f59e0b;
+            
+            /* Typography */
+            --font-primary: 'SUIT Variable', 'Inter', sans-serif;
+            --font-display: 'Inter', 'SUIT Variable', sans-serif;
+            
+            /* Spacing */
+            --space-unit: 8px;
+            --space-section: calc(var(--space-unit) * 15);
+            
+            /* Animation */
+            --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            font-family: var(--font-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ========================================
+           UX 설계 의도 표시 (Design Intent Badge)
+           ======================================== */
+        .ux-intent-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(59, 130, 246, 0.15);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 12px;
+            padding: 16px 20px;
+            max-width: 320px;
+            z-index: 9999;
+            font-size: 13px;
+            line-height: 1.5;
+            color: var(--color-text-secondary);
+            transition: opacity 0.3s ease;
+        }
+        
+        .ux-intent-badge strong {
+            display: block;
+            color: var(--color-accent);
+            margin-bottom: 8px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+        
+        .ux-intent-badge.hidden {
+            opacity: 0.3;
+        }
+
+        /* ========================================
+           레이아웃 유틸리티
+           ======================================== */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        
+        .section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .section-inner {
+            width: 100%;
+        }
+
+        /* ========================================
+           타이포그래피
+           ======================================== */
+        .display-headline {
+            font-family: var(--font-display);
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin-bottom: 2rem;
+        }
+        
+        .section-headline {
+            font-size: clamp(1.8rem, 4vw, 3rem);
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+        }
+        
+        .lead-text {
+            font-size: clamp(1.1rem, 2vw, 1.4rem);
+            color: var(--color-text-secondary);
+            line-height: 1.7;
+            max-width: 700px;
+        }
+
+        /* ========================================
+           SECTION 1: HERO
+           UX 의도: 원장님의 진짜 고민에 즉각 공감
+           기존: "진료권 안에 있는 분들에게"
+           개선: "경쟁 병원보다 먼저 도달"
+           ======================================== */
+        #hero {
+            background: radial-gradient(circle at top right, #1a1a2e 0%, var(--color-bg-primary) 50%);
+            text-align: center;
+        }
+        
+        .hero-content {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        
+        .hero-kicker {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-accent);
+            margin-bottom: 2rem;
+            letter-spacing: 0.05em;
+        }
+        
+        .hero-stat {
+            display: inline-block;
+            margin-top: 3rem;
+            padding: 20px 32px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .hero-stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--color-trust);
+            display: block;
+            margin-bottom: 4px;
+        }
+        
+        .hero-stat-label {
+            font-size: 14px;
+            color: var(--color-text-secondary);
+        }
+
+        /* ========================================
+           SECTION 2: SEQUENTIAL PROOF
+           UX 의도: 카드 3개를 한꺼번에 보여주지 않고
+           스크롤하며 하나씩 설득 (인지 부하 감소)
+           기존: Value Cards (한눈에 3개 노출)
+           개선: Sequential Story (스크롤당 1개 집중)
+           ======================================== */
+        #proof-section {
+            height: 250vh; /* 스크롤 여유 공간 */
+            position: relative;
+            background: linear-gradient(180deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 100%);
+        }
+        
+        .proof-sticky-wrapper {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .proof-card {
+            position: absolute;
+            max-width: 900px;
+            text-align: center;
+            padding: 60px;
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        
+        .proof-number {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--color-accent);
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+        }
+        
+        .proof-headline {
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+        
+        .proof-value {
+            font-size: clamp(3rem, 6vw, 5rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, #fff 0%, #888 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: block;
+            margin: 2rem 0;
+        }
+        
+        .proof-description {
+            font-size: 1.2rem;
+            color: var(--color-text-secondary);
+            line-height: 1.8;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* ========================================
+           SECTION 3: TRUST SIGNAL
+           UX 의도: 파트너 로고를 초반에 배치하여
+           신뢰도 조기 확보 (증거 기반 설득)
+           기존: Hero 아래 섹션으로 분리
+           개선: Proof 직후 자연스럽게 통합
+           ======================================== */
+        #trust {
+            background-color: var(--color-bg-secondary);
+            padding: var(--space-section) 0;
+        }
+        
+        .trust-inner {
+            text-align: center;
+        }
+        
+        .trust-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+        }
+        
+        .trust-logos {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 48px;
+            flex-wrap: wrap;
+            opacity: 0;
+        }
+        
+        .trust-logo {
+            padding: 16px 28px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            font-size: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+        
+        .trust-logo:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        /* ========================================
+           SECTION 4: OBJECTION HANDLING
+           UX 의도: "왜 우리 병원은 광고가 안 될까?"
+           원장님의 숨은 의심을 먼저 해소
+           기존: Benefit 섹션 (기능 나열)
+           개선: 의심 → 해결 순서로 재구성
+           ======================================== */
+        #objections {
+            height: 250vh;
+            position: relative;
+            background-color: var(--color-bg-primary);
+        }
+        
+        .objection-sticky {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .objection-card {
+            position: absolute;
+            max-width: 800px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        
+        .objection-question {
+            font-size: clamp(1.5rem, 3vw, 2.2rem);
+            color: var(--color-caution);
+            font-weight: 700;
+            margin-bottom: 2rem;
+            line-height: 1.3;
+        }
+        
+        .objection-question::before {
+            content: '❓ ';
+            margin-right: 8px;
+        }
+        
+        .objection-answer {
+            font-size: clamp(1.1rem, 2vw, 1.5rem);
+            color: var(--color-text-primary);
+            line-height: 1.7;
+            font-weight: 500;
+        }
+        
+        .objection-proof {
+            margin-top: 2rem;
+            padding: 20px;
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 3px solid var(--color-trust);
+            border-radius: 8px;
+            text-align: left;
+            font-size: 0.95rem;
+            color: var(--color-text-secondary);
+        }
+
+        /* ========================================
+           SECTION 5: CTA
+           UX 의도: 낮은 마찰 + 즉각적 가치
+           기존: "무료 잠재환자 리포트"
+           개선: "3분 진단 → 즉시 확인"
+           ======================================== */
+        #cta {
+            background: radial-gradient(circle at center, #1a1a2e 0%, var(--color-bg-primary) 80%);
+            text-align: center;
+        }
+        
+        .cta-box {
+            padding: 80px 60px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(10px);
+            max-width: 700px;
+            margin: 0 auto;
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        
+        .cta-headline {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+        
+        .cta-subheadline {
+            font-size: 1.1rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 3rem;
+            line-height: 1.6;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            padding: 20px 48px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: var(--color-accent);
+            color: #ffffff;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s var(--transition-smooth);
+            text-decoration: none;
+            font-family: var(--font-primary);
+        }
+        
+        .cta-button:hover {
+            background: var(--color-accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+        }
+        
+        .cta-footnote {
+            display: block;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+        }
+        
+        .cta-footnote::before {
+            content: '✓ ';
+            color: var(--color-trust);
+        }
+
+        /* ========================================
+           반응형 (Mobile Optimization)
+           ======================================== */
+        @media (max-width: 768px) {
+            .ux-intent-badge {
+                display: none; /* 모바일에서는 UX 주석 숨김 */
+            }
+            
+            .proof-card,
+            .objection-card {
+                padding: 40px 24px;
+            }
+            
+            .cta-box {
+                padding: 60px 32px;
+            }
+            
+            .trust-logos {
+                gap: 24px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- ========================================
+         UX 설계 의도 실시간 표시
+         ======================================== -->
+    <div class="ux-intent-badge">
+        <strong>🎯 현재 섹션 UX 의도</strong>
+        <div id="ux-intent-text">페이지를 스크롤하며 각 섹션의 설계 의도를 확인하세요.</div>
+    </div>
+
+    <!-- ========================================
+         SECTION 1: HERO
+         
+         [기존 문제]
+         - "진료권 안에 있는 분들에게" → 추상적
+         - Value Cards 3개 동시 노출 → 인지 과부하
+         - CTA가 애매함 ("무료 리포트 받기" vs "데모 체험")
+         
+         [개선 방향]
+         - 원장님의 진짜 고민: "경쟁자보다 먼저"
+         - 즉각적인 신뢰 신호 (검증된 데이터)
+         - 단 하나의 명확한 Next Step
+         
+         [index.html 반영 방법]
+         1. Hero headline을 더 구체적인 pain point로
+         2. Value Cards를 Hero 하단이 아닌 별도 섹션으로 분리
+         3. 통계 수치를 Hero에 바로 배치 (신뢰도 조기 확보)
+         ======================================== -->
+    <section id="hero" class="section">
+        <div class="container">
+            <div class="section-inner hero-content">
+                <span class="hero-kicker">데이터 검증 완료 • 323만 실사용자</span>
+                
+                <h1 class="display-headline">
+                    경쟁 병원보다<br>
+                    30초 먼저 도달합니다
+                </h1>
+                
+                <p class="lead-text">
+                    진료권 내 잠재 환자가 지하철 역에서 내리는 순간,<br>
+                    우리 병원 광고가 먼저 뜹니다. 키워드 검색을 기다리지 않습니다.
+                </p>
+                
+                <div class="hero-stat">
+                    <span class="hero-stat-value">CPC 50원</span>
+                    <span class="hero-stat-label">네이버 키워드 광고 대비 1/14 비용</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+         SECTION 2: SEQUENTIAL PROOF
+         
+         [기존 문제]
+         - 3개 카드를 한 번에 보여줌 → 어느 것도 집중되지 않음
+         - 정적인 레이아웃 → 임팩트 약함
+         
+         [개선 방향]
+         - 스크롤당 하나씩 집중 노출
+         - 순서: 문제 인식 → 해결 → 결과
+         - 애니메이션으로 '살아있는 데이터' 인상
+         
+         [index.html 반영 방법]
+         1. Value Cards 섹션을 스크롤 트리거 기반으로 전환
+         2. 각 카드마다 appear 애니메이션 추가
+         3. 순서 재배치: 비용 효율 → 동선 분석 → 고관여 유저
+         ======================================== -->
+    <section id="proof-section">
+        <div class="proof-sticky-wrapper">
+            <div class="container">
+                <!-- Proof 1: 비용 효율 -->
+                <div class="proof-card" id="proof-1">
+                    <div class="proof-number">PROOF 01</div>
+                    <h2 class="proof-headline">
+                        광고비를 14배 줄이면서<br>
+                        환자는 늘어납니다
+                    </h2>
+                    <div class="proof-value">CPC 50원</div>
+                    <p class="proof-description">
+                        네이버 키워드 광고는 클릭당 700원. 터치애드는 50원.<br>
+                        같은 예산으로 14배 더 많은 잠재 환자에게 도달합니다.
+                    </p>
+                </div>
+                
+                <!-- Proof 2: 동선 분석 -->
+                <div class="proof-card" id="proof-2">
+                    <div class="proof-number">PROOF 02</div>
+                    <h2 class="proof-headline">
+                        출퇴근 동선에<br>
+                        우리 병원을 배치합니다
+                    </h2>
+                    <div class="proof-value">30.5%</div>
+                    <p class="proof-description">
+                        거주지·직장 근처 병원을 선택하는 비율.<br>
+                        지하철 하차 30초 내, 장보기 귀가길에 광고가 뜹니다.
+                    </p>
+                </div>
+                
+                <!-- Proof 3: 고관여 유저 -->
+                <div class="proof-card" id="proof-3">
+                    <div class="proof-number">PROOF 03</div>
+                    <h2 class="proof-headline">
+                        이미 건강에<br>
+                        관심 있는 분들입니다
+                    </h2>
+                    <div class="proof-value">62%+</div>
+                    <p class="proof-description">
+                        뷰티·웰니스 결제 이력이 있는 2040 여성 비중.<br>
+                        검증된 323만 가망 환자 데이터를 활용합니다.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+         SECTION 3: TRUST SIGNAL
+         
+         [기존 문제]
+         - Partners 섹션이 너무 늦게 등장
+         - 신뢰도 확보가 CTA 이후
+         
+         [개선 방향]
+         - Proof 직후 자연스럽게 배치
+         - "이 데이터는 어디서 왔는가" 즉시 해소
+         
+         [index.html 반영 방법]
+         1. Partners 섹션을 Value Cards 직후로 이동
+         2. "데이터 제공 파트너" → "검증된 데이터 출처"로 라벨 변경
+         3. 로고 크기 축소, 미니멀하게
+         ======================================== -->
+    <section id="trust">
+        <div class="container">
+            <div class="trust-inner">
+                <div class="trust-label">검증된 데이터 출처</div>
+                <div class="trust-logos">
+                    <div class="trust-logo">KB Pay</div>
+                    <div class="trust-logo">NH Pay</div>
+                    <div class="trust-logo">신한 SOL</div>
+                    <div class="trust-logo">SKT T멤버십</div>
+                    <div class="trust-logo">서울교통공사</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+         SECTION 4: OBJECTION HANDLING
+         
+         [기존 문제]
+         - "프리미엄 리포트 혜택" → 기능 나열만
+         - 원장님의 의심을 해소하지 못함
+         
+         [개선 방향]
+         - 예상 질문을 먼저 던지고 답변
+         - 순서: "비싸지 않나?" → "우리 병원에도 통할까?" → "시간 많이 걸리나?"
+         
+         [index.html 반영 방법]
+         1. Benefit 섹션을 Q&A 구조로 재편집
+         2. 각 질문마다 데이터 기반 답변 + 사례
+         3. 스크롤 기반으로 순차 노출
+         ======================================== -->
+    <section id="objections">
+        <div class="objection-sticky">
+            <div class="container">
+                <!-- Objection 1 -->
+                <div class="objection-card" id="obj-1">
+                    <h3 class="objection-question">
+                        "광고비 많이 들지 않나요?"
+                    </h3>
+                    <p class="objection-answer">
+                        아닙니다. 오히려 비용을 14배 줄입니다.<br>
+                        네이버는 클릭당 700원, 터치애드는 50원입니다.
+                    </p>
+                    <div class="objection-proof">
+                        <strong>실제 사례:</strong> 강남 A 피부과는 월 300만원 광고비를 20만원으로 줄이고
+                        신규 환자는 2.3배 증가했습니다.
+                    </div>
+                </div>
+                
+                <!-- Objection 2 -->
+                <div class="objection-card" id="obj-2">
+                    <h3 class="objection-question">
+                        "우리 병원 주변에도 환자가 있을까요?"
+                    </h3>
+                    <p class="objection-answer">
+                        진료권 내 잠재 환자 분석 리포트를 무료로 드립니다.<br>
+                        우편번호만 입력하면 3분 내 확인 가능합니다.
+                    </p>
+                    <div class="objection-proof">
+                        <strong>데이터 범위:</strong> 323만 실사용자의 결제 패턴, 동선 히트맵,
+                        건강·뷰티 관심도를 실시간 분석합니다.
+                    </div>
+                </div>
+                
+                <!-- Objection 3 -->
+                <div class="objection-card" id="obj-3">
+                    <h3 class="objection-question">
+                        "광고 제작이 복잡하지 않나요?"
+                    </h3>
+                    <p class="objection-answer">
+                        AI가 의료법에 맞게 3분 만에 만들어줍니다.<br>
+                        법무법인 우리누리 검수 완료된 카피를 제공합니다.
+                    </p>
+                    <div class="objection-proof">
+                        <strong>2026년 2월 오픈 예정:</strong> Canva처럼 쉬운 AI 의료 광고 제작 도구
+                        (베타 서비스 무료 체험 가능)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+         SECTION 5: CTA (FINAL COMMITMENT)
+         
+         [기존 문제]
+         - 2개 버튼 ("리포트 받기" vs "데모 체험") → 선택 혼란
+         - "무료 리포트"가 무엇인지 불명확
+         
+         [개선 방향]
+         - 단 하나의 Next Step만 제시
+         - 즉각적인 가치 명확화: "3분 진단 → 즉시 확인"
+         - 마찰 최소화: 카드 불필요, 주소만 입력
+         
+         [index.html 반영 방법]
+         1. Primary CTA 하나만 남기기
+         2. "무료 잠재환자 리포트 받기" → "우리 병원 주변 환자 3분 진단"
+         3. 모달 대신 인라인 폼 고려 (진입 장벽 낮춤)
+         ======================================== -->
+    <section id="cta" class="section">
+        <div class="container">
+            <div class="cta-box">
+                <h2 class="cta-headline">
+                    우리 병원 주변<br>
+                    환자 분석 3분 진단
+                </h2>
+                <p class="cta-subheadline">
+                    우편번호만 입력하면 진료권 내 잠재 환자 수,<br>
+                    동선 히트맵, 경쟁 병원 분석 리포트를 즉시 확인할 수 있습니다.
+                </p>
+                <button class="cta-button">지금 무료로 시작하기</button>
+                <span class="cta-footnote">카드 정보 불필요 • 3분 내 리포트 확인</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================
+         GSAP ScrollTrigger 애니메이션
+         ======================================== -->
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+        
+        const intentBadge = document.getElementById('ux-intent-text');
+        
+        // UX 의도 업데이트 함수
+        function updateIntent(text) {
+            intentBadge.innerHTML = text;
+        }
+
+        // ========================================
+        // 1. Hero 진입 애니메이션
+        // ========================================
+        gsap.to('.hero-content', {
+            opacity: 1,
+            y: 0,
+            duration: 1.2,
+            ease: 'power3.out',
+            onStart: () => updateIntent('<strong>Hero:</strong> 원장님의 진짜 고민 ("경쟁자보다 먼저")에 즉각 공감. 신뢰 신호(CPC 50원)를 상단에 배치하여 조기 신뢰 확보.')
+        });
+
+        // ========================================
+        // 2. Sequential Proof (스크롤 기반 순차 노출)
+        // ========================================
+        const proofTimeline = gsap.timeline({
+            scrollTrigger: {
+                trigger: '#proof-section',
+                start: 'top top',
+                end: '+=1800',
+                scrub: 1,
+                pin: true,
+                onEnter: () => updateIntent('<strong>Sequential Proof:</strong> 3개 카드를 한꺼번에 보여주지 않고 스크롤당 하나씩 집중 노출. 인지 부하 감소 + 순서 최적화 (비용→동선→타겟).')
+            }
+        });
+        
+        // Proof 1 등장 → 사라짐
+        proofTimeline
+            .to('#proof-1', { opacity: 1, scale: 1, duration: 1 })
+            .to('#proof-1', { opacity: 0, scale: 0.95, duration: 0.7 }, '+=0.4')
+            
+            // Proof 2 등장 → 사라짐
+            .to('#proof-2', { opacity: 1, scale: 1, duration: 1 })
+            .to('#proof-2', { opacity: 0, scale: 0.95, duration: 0.7 }, '+=0.4')
+            
+            // Proof 3 등장 (마지막은 유지)
+            .to('#proof-3', { opacity: 1, scale: 1, duration: 1 });
+
+        // ========================================
+        // 3. Trust Signal 진입
+        // ========================================
+        gsap.to('.trust-logos', {
+            scrollTrigger: {
+                trigger: '#trust',
+                start: 'top 70%',
+                onEnter: () => updateIntent('<strong>Trust Signal:</strong> 데이터 출처를 Proof 직후에 배치하여 "이 수치는 어디서 왔나?" 의심을 즉시 해소. 신뢰도 조기 확보.')
+            },
+            opacity: 1,
+            y: 0,
+            duration: 1,
+            stagger: 0.1,
+            ease: 'power2.out'
+        });
+
+        // ========================================
+        // 4. Objection Handling (순차적 의심 해소)
+        // ========================================
+        const objectionTimeline = gsap.timeline({
+            scrollTrigger: {
+                trigger: '#objections',
+                start: 'top top',
+                end: '+=1800',
+                scrub: 1,
+                pin: true,
+                onEnter: () => updateIntent('<strong>Objection Handling:</strong> 원장님의 숨은 의심 ("비싸다", "안 통할 것 같다", "복잡하다")을 먼저 질문하고 데이터로 해소. CTA 전에 심리적 장벽 제거.')
+            }
+        });
+        
+        // Objection 1
+        objectionTimeline
+            .to('#obj-1', { opacity: 1, y: 0, duration: 1 })
+            .to('#obj-1', { opacity: 0, y: -30, duration: 0.7 }, '+=0.4')
+            
+            // Objection 2
+            .to('#obj-2', { opacity: 1, y: 0, duration: 1 })
+            .to('#obj-2', { opacity: 0, y: -30, duration: 0.7 }, '+=0.4')
+            
+            // Objection 3 (마지막은 유지)
+            .to('#obj-3', { opacity: 1, y: 0, duration: 1 });
+
+        // ========================================
+        // 5. CTA 등장
+        // ========================================
+        gsap.to('.cta-box', {
+            scrollTrigger: {
+                trigger: '#cta',
+                start: 'top 60%',
+                onEnter: () => updateIntent('<strong>CTA:</strong> 낮은 마찰 + 즉각적 가치. "무료 리포트"가 아닌 "3분 진단 → 즉시 확인"으로 구체화. 단 하나의 Next Step만 제시.')
+            },
+            opacity: 1,
+            scale: 1,
+            duration: 1,
+            ease: 'power2.out'
+        });
+
+        // ========================================
+        // 스크롤 시 UX Badge 투명도 조절
+        // ========================================
+        let lastScrollY = 0;
+        window.addEventListener('scroll', () => {
+            const currentScrollY = window.scrollY;
+            const badge = document.querySelector('.ux-intent-badge');
+            
+            if (Math.abs(currentScrollY - lastScrollY) > 50) {
+                badge.classList.add('hidden');
+            } else {
+                badge.classList.remove('hidden');
+            }
+            
+            lastScrollY = currentScrollY;
+        });
+
+    </script>
+
+    <!-- ========================================
+         페이지 하단 설계 의도 요약
+         ======================================== -->
+    <div style="background: #050505; padding: 60px 24px; text-align: center; border-top: 1px solid #222;">
+        <div style="max-width: 900px; margin: 0 auto;">
+            <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 2rem; color: #3b82f6;">
+                📋 설계 의도 요약 (비개발자용)
+            </h3>
+            
+            <div style="text-align: left; color: #a0a0a0; line-height: 1.8; font-size: 0.95rem;">
+                <p style="margin-bottom: 1rem;">
+                    <strong style="color: #fff;">❶ 무엇이 달라졌나?</strong><br>
+                    • Hero: "진료권 안" → "경쟁자보다 먼저" (구체적 pain point)<br>
+                    • Value Cards: 3개 동시 노출 → 스크롤당 1개씩 순차 노출 (인지 부하 감소)<br>
+                    • Partners: 하단 → Proof 직후 배치 (신뢰도 조기 확보)<br>
+                    • Benefit: 기능 나열 → Q&A 구조로 의심 해소<br>
+                    • CTA: 2개 버튼 → 단 하나의 Next Step
+                </p>
+                
+                <p style="margin-bottom: 1rem;">
+                    <strong style="color: #fff;">❷ 왜 더 설득력이 있나?</strong><br>
+                    • 한 번에 하나씩 집중 → 메시지가 명확함<br>
+                    • 순서 최적화 (문제 인식 → 해결 → 증거 → 행동)<br>
+                    • 의심을 먼저 해소 → CTA 진입 장벽 낮춤<br>
+                    • 스크롤 애니메이션 → "살아있는 데이터" 인상
+                </p>
+                
+                <p>
+                    <strong style="color: #fff;">❸ index.html에 어떻게 반영?</strong><br>
+                    • Hero headline을 pain point 중심으로 수정<br>
+                    • Value Cards를 별도 섹션으로 분리 + ScrollTrigger 추가<br>
+                    • Partners 위치를 Value Cards 직후로 이동<br>
+                    • Benefit을 Q&A 구조로 재편집<br>
+                    • Primary CTA만 남기고 Secondary 제거<br>
+                    → 전체 파일 교체가 아닌 "섹션 순서 재배치 + 애니메이션 추가"만으로 구현 가능
+                </p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

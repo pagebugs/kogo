@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>터치애드 - 시장 분석 인사이트</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT/fonts/variable/woff2/SUIT-Variable.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/insight.css">
+  <script src="js/config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <div class="container dashboard-container">
+    
+    <!-- 1. Header: Context & Authority -->
+    <header class="insight-header">
+      <div class="insight-title-group">
+        <h1>Market Intelligence</h1>
+        <div class="insight-meta">
+          <span class="hospital-badge" id="hospitalName">병원명</span>
+          <span>진료권 시장 규모 및 타겟 집중도 분석</span>
+        </div>
+      </div>
+      <div>
+        <span class="text-small text-muted" id="currentDate">2026.01.14 기준</span>
+      </div>
+    </header>
+
+    <!-- 2. KPI Cards: The "Ah-ha" Moment -->
+    <div class="kpi-row">
+      <!-- KPI 1: Scale (Market Activity Index) -->
+      <div class="kpi-card active" id="card-scale">
+        <div>
+          <div class="kpi-label">진료권 내 활성 소비 규모</div>
+          <div class="kpi-value-group">
+            <span class="kpi-value" id="val-scale">0</span>
+            <span class="kpi-unit">명</span>
+          </div>
+        </div>
+        <div class="kpi-desc">최근 4주 · 카드 결제 발생 기준</div>
+      </div>
+
+      <!-- KPI 2: Precision (Core Target Density) -->
+      <div class="kpi-card" id="card-precision">
+        <div>
+          <div class="kpi-label">핵심 타겟(30대) 밀집도</div>
+          <div class="kpi-value-group">
+            <span class="kpi-value" id="val-precision">0</span>
+            <span class="kpi-unit">%</span>
+          </div>
+        </div>
+        <div class="kpi-desc">고관여 소비층 비중</div>
+      </div>
+
+      <!-- KPI 3: Relevance (Category Fit) -->
+      <div class="kpi-card" id="card-relevance">
+        <div>
+          <div class="kpi-label">카테고리 적합성(여성)</div>
+          <div class="kpi-value-group">
+            <span class="kpi-value" id="val-relevance">0</span>
+            <span class="kpi-unit">%</span>
+          </div>
+        </div>
+        <div class="kpi-desc">진료 과목 연관 잠재 고객</div>
+      </div>
+
+      <!-- KPI 4: Reliability (Data Source) -->
+      <div class="kpi-card info-card">
+        <div>
+          <div class="kpi-label">데이터 신뢰도 검증</div>
+          <div class="kpi-value">Verified<br>Real Data</div>
+        </div>
+        <div class="kpi-desc">금융권 결제 데이터 기반<br>실시간 분석 완료</div>
+      </div>
+    </div>
+
+    <!-- 3. Dashboard Body: Interactive Analysis -->
+    <div class="dashboard-body">
+      
+      <!-- Left: Visualization -->
+      <div class="chart-panel">
+        <div class="panel-header">
+          <div class="panel-title">타겟 세그먼트 구성</div>
+          <!-- Toggles removed: Heatmap is now persistent -->
+        </div>
+        
+        <div class="viz-container">
+          <!-- 1. Spatial Context: Heatmap (Always Top) -->
+          <div class="map-section" id="view-map">
+            <div id="kakaoMap"></div>
+          </div>
+
+          <!-- 2. Data Context: Chart (Always Bottom) -->
+          <div class="chart-section-wrapper" id="view-chart">
+            <canvas id="mainChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Simulator Controls -->
+      <div class="control-panel">
+        
+        <!-- Radius Simulation -->
+        <div class="control-card">
+          <div class="control-title">
+            <span>반경 시뮬레이션</span>
+          </div>
+          <div class="radius-slider-wrapper">
+            <div class="radius-track-labels">
+              <span>500m</span>
+              <span>700m</span>
+              <span>1km</span>
+            </div>
+            <input type="range" class="radius-input" min="0" max="2" step="1" value="2" id="radiusSlider">
+          </div>
+          
+          <div class="radius-feedback">
+            <span class="radius-current" id="radiusDisplay">1km</span>
+            <span class="radius-context">도보 15분 내외 진료권</span>
+          </div>
+        </div>
+
+        <!-- Opportunity Context -->
+        <div class="control-card">
+          <div class="control-title">시장 잠재력 진단</div>
+          <div class="opportunity-box">
+            <div class="opp-label">TOUCH POTENTIAL</div>
+            <div class="opp-value" style="color: #000;">HIGH LEVEL</div>
+            <p class="text-small text-muted mt-2 mb-0">
+              해당 구역은 30대 여성 소비 비중이 타 지역 대비 <strong>1.4배</strong> 높습니다.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="dashboard-footer">
+      * 본 리포트는 터치애드 파트너스(KB, NH, SKT)의 비식별화된 데이터를 기반으로 생성된 BI입니다.
+    </div>
+
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // -------------------------------------------------------
+      // 1. Data Loading & Initialization
+      // -------------------------------------------------------
+      const storedData = localStorage.getItem('touchadData');
+      
+      // Fallback for direct access without data (Dev Mode)
+      // resData[0]: Overall, resData[1]: 30s, resData[2]: Female
+      const defaultData = {
+        hospitalName: "체험 병원",
+        resData: [
+          { target: 12500 }, // Total
+          { target: 4500 },  // 30s
+          { target: 8200 }   // Female
+        ]
+      };
+
+      const data = storedData ? JSON.parse(storedData) : defaultData;
+      
+      // Values
+      const baseTotal = data.resData[0]?.target || 0;
+      const baseAge = data.resData[1]?.target || 0;
+      const baseGender = data.resData[2]?.target || 0;
+
+      // UI References
+      const elHospitalName = document.getElementById('hospitalName');
+      const elDate = document.getElementById('currentDate');
+      
+      // KPIs
+      const elValScale = document.getElementById('val-scale');
+      const elValPrecision = document.getElementById('val-precision');
+      const elValRelevance = document.getElementById('val-relevance');
+
+      // Slider
+      const elRadiusSlider = document.getElementById('radiusSlider');
+      const elRadiusDisplay = document.getElementById('radiusDisplay');
+
+      // Set Metadata
+      elHospitalName.textContent = data.hospitalName || "체험 병원";
+      const today = new Date();
+      elDate.textContent = `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2, '0')}.${String(today.getDate()).padStart(2, '0')} 기준`;
+
+      // Simulation Config
+      // 500m(0) -> x0.6, 700m(1) -> x0.8, 1km(2) -> x1.0
+      const radiusConfig = [
+        { label: '500m', multiplier: 0.6, desc: '도보 7분 내외 핵심 상권' },
+        { label: '700m', multiplier: 0.8, desc: '도보 10분 내외 확장 상권' },
+        { label: '1km', multiplier: 1.0, desc: '도보 15분 내외 전체 진료권' }
+      ];
+
+      let currentRadiusIndex = 2;
+
+      // Chart
+      let chartInstance = null;
+      const ctx = document.getElementById('mainChart').getContext('2d');
+
+      // Map & Heatmap
+      let map = null;
+      let heatmap = null;
+      let isMapLoaded = false;
+      const GANGNAM_COORDS = { lat: 37.517316, lng: 127.047466 }; // Gangnam-gu Office area
+
+      // -------------------------------------------------------
+      // 2. Logic & Rendering
+      // -------------------------------------------------------
+      
+      // ... (Chart logic remains same)
+
+      function initChart() {
+        Chart.defaults.font.family = 'SUIT';
+        Chart.defaults.color = '#666';
+
+        chartInstance = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: ['전체 시장 규모', '여성 고객', '30대 핵심 타겟'],
+            datasets: [{
+              label: '유저 수',
+              data: [0, 0, 0], // Initial empty
+              backgroundColor: [
+                'rgba(51, 51, 51, 1)',   // Dark Gray
+                'rgba(102, 102, 102, 0.8)', // Medium Gray
+                'rgba(153, 153, 153, 0.6)'  // Light Gray
+              ],
+              borderWidth: 0,
+              borderRadius: 4,
+              barPercentage: 0.5
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: 'rgba(0,0,0,0.9)',
+                padding: 12,
+                cornerRadius: 4,
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: { color: '#f0f0f0' },
+                border: { display: false }
+              },
+              x: {
+                grid: { display: false },
+                border: { display: false }
+              }
+            },
+            animation: { duration: 600, easing: 'easeOutQuart' }
+          }
+        });
+      }
+
+      function updateDashboard() {
+        // ... (Existing logic)
+        // 1. Calculate Multiplier
+        const config = radiusConfig[currentRadiusIndex];
+        const multiplier = config.multiplier;
+
+        // 2. Compute Simulated Values
+        const currentTotal = Math.round(baseTotal * multiplier);
+        const currentGender = Math.round(baseGender * multiplier); 
+        const currentAge = Math.round(baseAge * multiplier);       
+
+        // 3. Update KPIs
+        animateValue(elValScale, parseInt(elValScale.textContent.replace(/,/g, '')), currentTotal, 500);
+        
+        const precision = ((currentAge / currentTotal) * 100).toFixed(1);
+        elValPrecision.textContent = precision;
+
+        const relevance = ((currentGender / currentTotal) * 100).toFixed(1);
+        elValRelevance.textContent = relevance;
+
+        // 4. Update Slider Feedback
+        elRadiusDisplay.textContent = config.label;
+        document.querySelector('.radius-context').textContent = config.desc;
+
+        // 5. Update Chart
+        if (chartInstance) {
+          chartInstance.data.datasets[0].data = [currentTotal, currentGender, currentAge];
+          chartInstance.update();
+        }
+
+        // 6. Update Map (if loaded)
+        if (map) {
+          updateHeatmapLevel(currentRadiusIndex);
+        }
+      }
+
+      // ... (animateValue helper)
+      function animateValue(obj, start, end, duration) {
+        let startTimestamp = null;
+        const step = (timestamp) => {
+          if (!startTimestamp) startTimestamp = timestamp;
+          const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+          const value = Math.floor(progress * (end - start) + start);
+          obj.textContent = value.toLocaleString();
+          if (progress < 1) {
+            window.requestAnimationFrame(step);
+          }
+        };
+        window.requestAnimationFrame(step);
+      }
+
+      // -------------------------------------------------------
+      // 3. Map Implementation
+      // -------------------------------------------------------
+      function loadKakaoMap() {
+        if (isMapLoaded) return;
+        
+        if (!TOUCH_CONFIG || !TOUCH_CONFIG.KAKAO_API_KEY) {
+          showMapError("API Key Configuration Missing");
+          return;
+        }
+
+        const script = document.createElement("script");
+        script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${TOUCH_CONFIG.KAKAO_API_KEY}&libraries=services&autoload=false`;
+        
+        script.onload = () => {
+          kakao.maps.load(() => {
+            initMap();
+          });
+        };
+        
+        script.onerror = () => {
+          showMapError("Kakao Maps API Failed to Load.<br>Check Domain Settings or Network.");
+        };
+
+        document.head.appendChild(script);
+      }
+
+      function showMapError(msg) {
+        const container = document.getElementById('kakaoMap');
+        if (container) {
+          container.innerHTML = `
+            <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:100%; background:#f5f5f5; color:#999; text-align:center;">
+              <div style="font-size:24px; margin-bottom:10px;">⚠️</div>
+              <div style="font-size:14px; font-weight:500;">${msg}</div>
+            </div>
+          `;
+        }
+      }
+
+      function initMap() {
+        const container = document.getElementById('kakaoMap');
+        const options = {
+          center: new kakao.maps.LatLng(GANGNAM_COORDS.lat, GANGNAM_COORDS.lng),
+          level: 4
+        };
+
+        map = new kakao.maps.Map(container, options);
+        isMapLoaded = true;
+
+        // Geocoder for Address Search
+        const geocoder = new kakao.maps.services.Geocoder();
+        const testAddress = "서울 강남구 학동로 343"; // Gangnam-gu Office Address
+
+        geocoder.addressSearch(testAddress, function(result, status) {
+          if (status === kakao.maps.services.Status.OK) {
+            const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+            map.setCenter(coords);
+            new kakao.maps.Marker({
+              map: map,
+              position: coords
+            });
+          }
+        });
+      }
+
+      function updateHeatmapLevel(radiusIdx) {
+        if (!map) return;
+        const zoomLevels = [3, 4, 5]; 
+        const targetLevel = zoomLevels[radiusIdx];
+        map.setLevel(targetLevel, {animate: true});
+      }
+
+      // -------------------------------------------------------
+      // 4. Interaction Wiring
+      // -------------------------------------------------------
+      
+      initChart();
+      updateDashboard();
+      loadKakaoMap();
+
+      // Slider
+      elRadiusSlider.addEventListener('input', (e) => {
+        currentRadiusIndex = parseInt(e.target.value);
+        updateDashboard();
+      });
+
+      // (View Toggles Logic Removed)
+
+
+    });
+  </script>
+</body>
+</html>

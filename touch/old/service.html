@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>서비스 체험하기</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT/fonts/variable/woff2/SUIT-Variable.css">
+  <style>
+    :root {
+      --font-family-base: "SUIT", -apple-system, BlinkMacSystemFont, sans-serif;
+      --color-black: #000000;
+      --color-dark-gray: #333333;
+      --color-medium-gray: #666666;
+      --color-light-gray: #999999;
+      --color-bg-gray: #f5f5f5;
+      --color-white: #ffffff;
+      --color-border-gray: #e0e0e0;
+      --space-2: 0.5rem;
+      --space-3: 0.75rem;
+      --space-4: 1rem;
+      --space-6: 1.5rem;
+      --space-8: 2rem;
+      --border-radius: 8px;
+    }
+
+    body {
+      font-family: var(--font-family-base);
+      margin: 0;
+      padding: var(--space-8);
+      background: var(--color-white);
+      color: var(--color-black);
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      margin: 0 0 var(--space-4) 0;
+      font-weight: 700;
+    }
+
+    p {
+      color: var(--color-medium-gray);
+      margin: 0 0 var(--space-6) 0;
+      line-height: 1.5;
+    }
+
+    .form-group {
+      margin-bottom: var(--space-4);
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: var(--space-2);
+      font-size: 0.9rem;
+    }
+
+    .needed { color: #ff0000; }
+
+    .address-group {
+      display: flex;
+      gap: var(--space-2);
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: var(--space-3);
+      border: 1px solid var(--color-border-gray);
+      border-radius: var(--border-radius);
+      font-family: inherit;
+      font-size: 1rem;
+    }
+
+    input[type="text"][readonly] {
+      background: var(--color-bg-gray);
+      cursor: pointer;
+    }
+
+    button {
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 600;
+      border-radius: var(--border-radius);
+      transition: 0.2s;
+    }
+
+    .btn-search {
+      padding: var(--space-3);
+      border: 1px solid var(--color-black);
+      background: var(--color-white);
+      color: var(--color-black);
+      white-space: nowrap;
+    }
+
+    .btn-search:hover {
+      background: var(--color-black);
+      color: var(--color-white);
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: var(--space-4);
+      background: var(--color-black);
+      color: var(--color-white);
+      border: none;
+      font-size: 1rem;
+      margin-top: var(--space-4);
+    }
+
+    .btn-submit:disabled {
+      background: var(--color-light-gray);
+      cursor: not-allowed;
+    }
+
+    /* Loading Overlay */
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      color: white;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      text-align: center;
+    }
+    
+    .wave-loader span {
+      display: inline-block;
+      width: 4px;
+      height: 20px;
+      background: white;
+      margin: 0 2px;
+      animation: wave 1s infinite ease-in-out;
+    }
+    .wave-loader span:nth-child(1) { animation-delay: 0.0s; }
+    .wave-loader span:nth-child(2) { animation-delay: 0.1s; }
+    .wave-loader span:nth-child(3) { animation-delay: 0.2s; }
+    .wave-loader span:nth-child(4) { animation-delay: 0.3s; }
+    .wave-loader span:nth-child(5) { animation-delay: 0.4s; }
+
+    @keyframes wave {
+      0%, 40%, 100% { transform: scaleY(0.4); }
+      20% { transform: scaleY(1.0); }
+    }
+
+    .messages p {
+      display: none;
+      font-size: 1.1rem;
+      margin-top: 20px;
+    }
+    .messages p.active { display: block; }
+    
+    .error-msg {
+        display: none;
+        margin-top: 20px;
+        line-height: 1.5;
+    }
+    .retry-btn {
+        margin-top: 15px;
+        padding: 5px 15px;
+        background: white;
+        color: black;
+        border: none;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>서비스 체험하기</h2>
+  <p>원장님의 병원 주소를 입력하면,<br>주변 잠재 환자 데이터를 확인하실 수 있습니다.</p>
+
+  <div class="form-group">
+    <label>병원 주소<span class="needed"> *</span></label>
+    <div class="address-group">
+      <input type="text" id="hospital-address" placeholder="시/군/구, 읍/면/동" readonly>
+      <button type="button" class="btn-search" id="addressSearchBtn">우편번호 검색</button>
+    </div>
+  </div>
+
+  <button type="button" class="btn-submit" id="submitBtn" disabled>데이터 확인하기</button>
+
+  <div id="loadingOverlay" class="overlay">
+    <div class="wave-loader" id="waveLoader">
+        <span></span><span></span><span></span><span></span><span></span>
+    </div>
+    <div class="messages" id="messages">
+        <p>카드 소비 데이터 수집 중…</p>
+        <p>잠재 환자 분석 중…</p>
+        <p>리포트 생성 중…</p>
+    </div>
+    <div id="errorMessage" class="error-msg">
+        서버 트랜잭션이 많아<br>서비스가 원활하지 않습니다.<br>잠시 후 다시 시도해주세요.
+        <br><button id="retryBtn" class="retry-btn">재시도</button>
+    </div>
+  </div>
+
+  <!-- Daum Postcode -->
+  <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const addressInput = document.getElementById('hospital-address');
+      const searchBtn = document.getElementById('addressSearchBtn');
+      const submitBtn = document.getElementById('submitBtn');
+      const overlay = document.getElementById('loadingOverlay');
+      const msgs = document.querySelectorAll('#messages p');
+      const errorMsg = document.getElementById('errorMessage');
+      const retryBtn = document.getElementById('retryBtn');
+      const waveLoader = document.getElementById('waveLoader');
+      const messagesDiv = document.getElementById('messages');
+
+    let postcode = "";
+    let msgInterval;
+    let isTimedOut = false;
+
+    // Search Address
+    function openPostcode() {
+        new daum.Postcode({
+            oncomplete: function(data) {
+                let addr = data.roadAddress || data.jibunAddress;
+                // Building logic
+                let extra = '';
+                if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)) extra += data.bname;
+                if(data.buildingName !== '') extra += (extra !== '' ? ', ' + data.buildingName : data.buildingName);
+                if(extra !== '') addr += ' (' + extra + ')';
+
+                postcode = data.zonecode; // not really used for API calls in original logic but kept for consistency
+                addressInput.value = addr;
+                submitBtn.disabled = false;
+            }
+        }).open();
+    }
+
+    searchBtn.addEventListener('click', openPostcode);
+    addressInput.addEventListener('click', openPostcode);
+
+    // Submit Logic
+    submitBtn.addEventListener('click', async () => {
+        if(!addressInput.value) return;
+        
+        submitBtn.disabled = true;
+        submitBtn.textContent = "처리 중...";
+        isTimedOut = false;
+        
+        await fetchData();
+    });
+
+    retryBtn.addEventListener('click', async () => {
+        errorMsg.style.display = 'none';
+        waveLoader.style.display = 'block';
+        messagesDiv.style.display = 'block';
+        isTimedOut = false;
+        await fetchData();
+    });
+
+    async function fetchData() {
+        overlay.style.display = 'flex';
+        
+        // Message Cycle
+        let idx = 0;
+        msgs.forEach(m => m.classList.remove('active'));
+        if(msgs.length > 0) msgs[0].classList.add('active');
+        
+        msgInterval = setInterval(() => {
+            msgs.forEach(m => m.classList.remove('active'));
+            idx = (idx + 1) % msgs.length;
+            msgs[idx].classList.add('active');
+        }, 3000);
+
+        // Timeout (60s)
+        const timeoutId = setTimeout(() => {
+            isTimedOut = true;
+            clearInterval(msgInterval);
+            waveLoader.style.display = 'none';
+            messagesDiv.style.display = 'none';
+            errorMsg.style.display = 'block';
+        }, 60000);
+
+        try {
+            // Default Params: 30s (C), Female (F), Plastic Surgery (미용원)
+            const apiRequestData = [
+                {
+                  card_dong_nm: postcode || "00000", // Fallback if empty
+                  sex: "M,F,Z",
+                  age: "A,B,C,D,E,F,G",
+                  card_sub: "미용원",
+                },
+                {
+                  card_dong_nm: postcode || "00000",
+                  sex: "M,F,Z",
+                  age: "C", // 30s
+                  card_sub: "미용원",
+                },
+                {
+                  card_dong_nm: postcode || "00000",
+                  sex: "F,Z", // Female
+                  age: "A,B,C,D,E,F,G",
+                  card_sub: "미용원",
+                }
+            ];
+
+            const res = await fetch("https://t.at.runcomm.co.kr/service/v1/post/health/care", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(apiRequestData)
+            });
+
+            const data = await res.json();
+
+            if (!isTimedOut) {
+                clearTimeout(timeoutId);
+                clearInterval(msgInterval);
+
+                // Save to localStorage
+                const localData = {
+                    hospitalName: "체험 병원",
+                    generalData: {
+                        gender: "여성",
+                        age: "30대",
+                        partnerCd: "성형외과",
+                        addressBase: addressInput.value,
+                        addressDetail: ""
+                    },
+                    resData: data
+                };
+
+                localStorage.setItem("touchadData", JSON.stringify(localData));
+                localStorage.setItem("address-base", addressInput.value);
+                localStorage.setItem("address-detail", "");
+                
+                const token = "demo_token_" + Date.now();
+                localStorage.setItem("user_token", token);
+
+                // Redirect
+                window.location.href = `../as-is/r.html?token=${encodeURIComponent(token)}`;
+            }
+
+        } catch (err) {
+            console.error(err);
+             if (!isTimedOut) {
+                clearTimeout(timeoutId);
+                clearInterval(msgInterval);
+                waveLoader.style.display = 'none';
+                messagesDiv.style.display = 'none';
+                errorMsg.style.display = 'block';
+            }
+        }
+    });
+  </script>
+</body>
+</html>

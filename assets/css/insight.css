@@ -1,0 +1,917 @@
+/* =========================================================
+   TOUCHAD - INSIGHT DASHBOARD
+   Specific styles for newresult.html
+   Extends style.css tokens
+ ========================================================= */
+
+.dashboard-container {
+  padding-top: var(--space-8);
+  padding-bottom: var(--space-16);
+}
+
+/* ---------------------------------------------------------
+   1. Header Area
+   --------------------------------------------------------- */
+.insight-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: var(--space-8);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--color-border-gray);
+}
+
+.insight-title-group h1 {
+  font-size: var(--font-xl);
+  font-weight: 700;
+  margin-bottom: var(--space-2);
+  letter-spacing: -0.5px;
+}
+
+.insight-meta {
+  font-size: var(--font-base);
+  color: var(--color-medium-gray);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.hospital-badge {
+  font-weight: 700;
+  color: var(--color-black);
+  background-color: var(--color-bg-gray);
+  padding: 4px 12px;
+  border-radius: 4px;
+}
+
+/* ---------------------------------------------------------
+   2. KPI Cards (Top Row)
+   --------------------------------------------------------- */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-6);
+  margin-bottom: var(--space-10);
+}
+
+.kpi-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-border-gray);
+  border-radius: var(--border-radius);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 160px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.kpi-card:hover {
+  border-color: var(--color-black);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.kpi-card.active {
+  border-color: var(--color-black);
+  background-color: #fafafa;
+}
+
+.kpi-label {
+  font-size: var(--font-sm);
+  color: var(--color-medium-gray);
+  font-weight: 500;
+  margin-bottom: var(--space-2);
+}
+
+.kpi-value-group {
+  margin-top: auto;
+}
+
+.kpi-value {
+  font-size: var(--font-2xl);
+  font-weight: 700;
+  color: var(--color-black);
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+.kpi-unit {
+  font-size: var(--font-md);
+  color: var(--color-medium-gray);
+  margin-left: 2px;
+  font-weight: 400;
+}
+
+.kpi-desc {
+  font-size: var(--font-xs);
+  color: var(--color-light-gray);
+  margin-top: var(--space-2);
+}
+
+/* Special styling for the 'Reliability' card */
+.kpi-card.info-card {
+  background-color: var(--color-black);
+  border-color: var(--color-black);
+  color: var(--color-white);
+}
+
+.kpi-card.info-card .kpi-label,
+.kpi-card.info-card .kpi-unit,
+.kpi-card.info-card .kpi-desc {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.kpi-card.info-card .kpi-value {
+  color: var(--color-white);
+  font-size: var(--font-lg); 
+  line-height: 1.4;
+}
+
+/* ---------------------------------------------------------
+   3. Main Dashboard Body (Grid)
+   --------------------------------------------------------- */
+.dashboard-body {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--space-8);
+  align-items: start;
+}
+
+/* Left: Chart Section */
+.chart-panel {
+  background: var(--color-white);
+  border: 1px solid var(--color-border-gray);
+  border-radius: var(--border-radius);
+  padding: var(--space-8);
+  min-height: 500px;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-6);
+}
+
+.panel-title {
+  font-size: var(--font-lg);
+  font-weight: 700;
+}
+
+/* View Toggles */
+.chart-controls {
+  display: flex;
+  gap: var(--space-2);
+  background: var(--color-bg-gray);
+  padding: 4px;
+  border-radius: 6px;
+}
+
+.view-toggle-btn {
+  border: none;
+  background: transparent;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: var(--font-xs);
+  font-weight: 600;
+  color: var(--color-medium-gray);
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.view-toggle-btn.active {
+  background: var(--color-white);
+  color: var(--color-black);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Visualization Containers */
+.viz-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  width: 100%;
+}
+
+.map-section {
+  width: 100%;
+  height: 280px;
+  position: relative;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  background-color: var(--color-bg-gray);
+  border: 1px solid var(--color-border-gray);
+}
+
+.chart-section-wrapper {
+  width: 100%;
+  height: 300px;
+  position: relative;
+}
+
+#kakaoMap {
+  width: 100%;
+  height: 100%;
+}
+
+
+
+/* Right: Control Panel (Radius & Simulator) */
+.control-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.control-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-border-gray);
+  border-radius: var(--border-radius);
+  padding: var(--space-6);
+}
+
+.control-title {
+  font-size: var(--font-md);
+  font-weight: 600;
+  margin-bottom: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Radius Slider */
+.radius-slider-wrapper {
+  padding: var(--space-4) 0;
+}
+
+.radius-track-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  color: var(--color-medium-gray);
+}
+
+.radius-input {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  background: var(--color-bg-gray);
+  border-radius: 3px;
+  outline: none;
+}
+
+.radius-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-black);
+  cursor: pointer;
+  border: 2px solid var(--color-white);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  transition: transform 0.2s;
+}
+
+.radius-input::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+}
+
+.radius-feedback {
+  margin-top: var(--space-6);
+  text-align: center;
+  padding-top: var(--space-4);
+  border-top: 1px dashed var(--color-border-gray);
+}
+
+.radius-current {
+  font-size: var(--font-xl);
+  font-weight: 700;
+  color: var(--color-black);
+  display: block;
+}
+
+.radius-context {
+  font-size: var(--font-xs);
+  color: var(--color-medium-gray);
+}
+
+/* Opportunity Context Box */
+.opportunity-box {
+  background: var(--color-bg-gray);
+  padding: var(--space-4);
+  border-radius: 4px;
+  margin-top: var(--space-4);
+}
+
+.opp-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--color-medium-gray);
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  margin-bottom: var(--space-2);
+}
+
+.opp-value {
+  font-size: var(--font-base);
+  font-weight: 600;
+  color: var(--color-dark-gray);
+}
+
+/* Footer Note */
+.dashboard-footer {
+  margin-top: var(--space-8);
+  font-size: 11px;
+  color: var(--color-light-gray);
+  text-align: right;
+  border-top: 1px solid var(--color-bg-gray);
+  padding-top: var(--space-4);
+}
+
+/* Opportunity Alert Box (New) */
+.alert-box {
+  background-color: #fafafa;
+  border-left: 4px solid var(--color-black);
+  padding: var(--space-6);
+  margin-top: var(--space-6);
+  border-radius: 0 var(--border-radius) var(--border-radius) 0;
+}
+
+.alert-title {
+  font-weight: 700;
+  font-size: var(--font-base);
+  margin-bottom: var(--space-2);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.alert-desc {
+  font-size: var(--font-sm);
+  color: var(--color-dark-gray);
+  line-height: 1.5;
+}
+
+/* Sticky CTA Bar (New) */
+.sticky-cta-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: var(--color-black);
+  color: var(--color-white);
+  padding: var(--space-4) 0;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+  z-index: 1000;
+  animation: slideUp 0.5s ease-out forwards;
+}
+
+.cta-container {
+  max-width: var(--container-width);
+  margin: 0 auto;
+  padding: 0 var(--container-padding);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cta-message {
+  font-size: var(--font-lg);
+  font-weight: 500;
+}
+
+.cta-message strong {
+  color: #ffe600; /* Emphasis color */
+  font-weight: 700;
+}
+
+.cta-buttons {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.cta-btn {
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  font-size: var(--font-base);
+  cursor: pointer;
+  transition: var(--transition);
+  text-decoration: none;
+  display: inline-block;
+}
+
+.cta-btn-primary {
+  background: var(--color-white);
+  color: var(--color-black);
+  border: 1px solid var(--color-white);
+}
+
+.cta-btn-primary:hover {
+  background: #ffe600;
+  border-color: #ffe600;
+  color: var(--color-black);
+}
+
+.cta-btn-secondary {
+  background: transparent;
+  color: var(--color-white);
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+.cta-btn-secondary:hover {
+  border-color: var(--color-white);
+}
+
+/* Insight Box (New) */
+.insight-box-row {
+  background: #f8f9fa;
+  border: 1px dashed var(--color-black);
+  border-radius: var(--border-radius);
+  padding: var(--space-4) var(--space-6);
+  margin-bottom: var(--space-8);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.insight-icon {
+  font-size: var(--font-lg);
+}
+
+.insight-text {
+  font-size: var(--font-base);
+  font-weight: 500;
+  color: var(--color-dark-gray);
+}
+
+/* ---------------------------------------------------------
+   4. Responsive
+   --------------------------------------------------------- */
+@media (max-width: 960px) {
+  .kpi-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .insight-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+  
+  .kpi-row {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .dashboard-body {
+    grid-template-columns: 1fr;
+  }
+  
+  .insight-box-row {
+    flex-direction: column;
+    text-align: center;
+    padding: var(--space-4);
+  }
+
+  .cta-container {
+    flex-direction: column;
+    gap: var(--space-3);
+    text-align: center;
+  }
+  
+  .cta-message {
+    font-size: var(--font-base);
+  }
+
+  .cta-buttons {
+    width: 100%;
+  }
+
+  .cta-btn {
+    flex: 1;
+    padding: var(--space-3);
+    text-align: center;
+    font-size: var(--font-sm);
+  }
+  
+  .chart-panel {
+    min-height: auto;
+  }
+  
+  .chart-wrapper {
+    height: 300px;
+  }
+  
+  .insight-title-group h1 {
+    font-size: var(--font-lg);
+  }
+  
+  .dashboard-container {
+    padding-bottom: 140px; /* Space for Sticky CTA */
+  }
+}
+
+/* ---------------------------------------------------------
+   5. AI Insight Section
+   --------------------------------------------------------- */
+.ai-insight-section {
+  margin-top: var(--space-8);
+  margin-bottom: var(--space-8);
+}
+
+.ai-insight-card {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  border-radius: var(--border-radius);
+  padding: var(--space-6);
+  color: var(--color-white);
+  position: relative;
+  overflow: hidden;
+}
+
+.ai-insight-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle, rgba(255,230,0,0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.ai-insight-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.ai-insight-icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.ai-insight-title {
+  font-size: var(--font-md);
+  font-weight: 600;
+  margin: 0;
+  color: var(--color-white);
+}
+
+.ai-insight-content {
+  font-size: var(--font-base);
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+@media (max-width: 720px) {
+  .ai-insight-card {
+    padding: var(--space-4);
+  }
+  
+  .ai-insight-content {
+    font-size: var(--font-sm);
+  }
+}
+
+/* ---------------------------------------------------------
+   6. Map Panel (Full Width)
+   --------------------------------------------------------- */
+.map-panel {
+  background: var(--color-white);
+  border: 1px solid var(--color-border-gray);
+  border-radius: var(--border-radius);
+  padding: var(--space-6);
+  margin-bottom: var(--space-8);
+}
+
+.map-section-full {
+  width: 100%;
+  height: 350px;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  background-color: var(--color-bg-gray);
+  border: 1px solid var(--color-border-gray);
+}
+
+.map-section-full #kakaoMap {
+  width: 100%;
+  height: 100%;
+}
+
+/* ---------------------------------------------------------
+   7. Premium Section & Subscription Overlay
+   --------------------------------------------------------- */
+.premium-section {
+  position: relative;
+  margin-top: var(--space-8);
+  margin-bottom: var(--space-8);
+}
+
+.alert-box-standalone {
+  background-color: #fafafa;
+  border-left: 4px solid var(--color-black);
+  padding: var(--space-6);
+  border-radius: 0 var(--border-radius) var(--border-radius) 0;
+  margin-bottom: var(--space-6);
+}
+
+.subscription-overlay {
+  position: relative;
+  margin-top: var(--space-6);
+}
+
+.subscription-blur {
+  position: absolute;
+  top: -20px;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.95));
+  pointer-events: none;
+  z-index: 1;
+}
+
+.subscription-content {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  border-radius: var(--border-radius);
+  padding: var(--space-10);
+  text-align: center;
+  color: var(--color-white);
+  position: relative;
+  z-index: 2;
+}
+
+.subscription-badge {
+  display: inline-block;
+  background: rgba(255, 230, 0, 0.2);
+  color: #ffe600;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: var(--font-sm);
+  font-weight: 600;
+  margin-bottom: var(--space-4);
+}
+
+.subscription-title {
+  font-size: var(--font-xl);
+  font-weight: 700;
+  margin: 0 0 var(--space-4);
+  color: var(--color-white);
+}
+
+.subscription-desc {
+  font-size: var(--font-base);
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
+  margin-bottom: var(--space-6);
+}
+
+.subscription-desc strong {
+  color: #ffe600;
+}
+
+.subscription-benefits {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-6);
+  margin-bottom: var(--space-8);
+  flex-wrap: wrap;
+}
+
+.benefit-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-sm);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.benefit-icon {
+  font-size: 18px;
+}
+
+.subscription-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.cta-btn-kakao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  background: #FEE500;
+  color: #3C1E1E;
+  border: none;
+  padding: var(--space-4) var(--space-8);
+  border-radius: var(--border-radius);
+  font-size: var(--font-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  min-width: 280px;
+}
+
+.cta-btn-kakao:hover {
+  background: #f5dc00;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(254, 229, 0, 0.4);
+}
+
+.cta-btn-secondary-alt {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--border-radius);
+  font-size: var(--font-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.cta-btn-secondary-alt:hover {
+  border-color: var(--color-white);
+  color: var(--color-white);
+}
+
+.subscription-note {
+  font-size: var(--font-xs);
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
+.subscription-note strong {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+@media (max-width: 720px) {
+  .subscription-content,
+  .subscription-card {
+    padding: var(--space-6);
+  }
+  
+  .subscription-title {
+    font-size: var(--font-lg);
+  }
+  
+  .subscription-benefits {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  
+  .cta-btn-kakao {
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .map-section-full {
+    height: 250px;
+  }
+}
+
+/* ---------------------------------------------------------
+   8. Premium Teaser Section (Paywall Style)
+   --------------------------------------------------------- */
+.premium-teaser-section {
+  position: relative;
+  margin-top: var(--space-8);
+  margin-bottom: var(--space-8);
+}
+
+.locked-content-wrapper {
+  position: relative;
+  overflow: hidden;
+  max-height: 280px;
+}
+
+.content-fade-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 180px;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.7) 40%,
+    rgba(255, 255, 255, 0.95) 70%,
+    rgba(255, 255, 255, 1) 100%
+  );
+  pointer-events: none;
+  z-index: 10;
+}
+
+.subscription-card {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  border-radius: var(--border-radius);
+  padding: var(--space-10);
+  text-align: center;
+  color: var(--color-white);
+  position: relative;
+  z-index: 20;
+  margin-top: -40px;
+}
+
+.subscription-card .subscription-badge {
+  display: inline-block;
+  background: rgba(255, 230, 0, 0.2);
+  color: #ffe600;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: var(--font-sm);
+  font-weight: 600;
+  margin-bottom: var(--space-4);
+}
+
+.subscription-card .subscription-title {
+  font-size: var(--font-xl);
+  font-weight: 700;
+  margin: 0 0 var(--space-4);
+  color: var(--color-white);
+}
+
+.subscription-card .subscription-desc {
+  font-size: var(--font-base);
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
+  margin-bottom: var(--space-6);
+}
+
+.subscription-card .subscription-desc strong {
+  color: #ffe600;
+}
+
+.subscription-card .subscription-benefits {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-6);
+  margin-bottom: var(--space-8);
+  flex-wrap: wrap;
+}
+
+.subscription-card .benefit-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-sm);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.subscription-card .subscription-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.subscription-card .subscription-note {
+  font-size: var(--font-xs);
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
+.subscription-card .subscription-note strong {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+@media (max-width: 720px) {
+  .locked-content-wrapper {
+    max-height: 200px;
+  }
+  
+  .content-fade-overlay {
+    height: 120px;
+  }
+  
+  .subscription-card {
+    padding: var(--space-6);
+    margin-top: -20px;
+  }
+  
+  .subscription-card .subscription-title {
+    font-size: var(--font-lg);
+  }
+  
+  .subscription-card .subscription-benefits {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+  }
+}

@@ -1,0 +1,27 @@
+# dependencies
+node_modules/
+
+# build
+dist/
+.vite/
+
+# env
+.env
+.env.*
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# deployment
+deploy_key
+deploy_key.pub
+local_dump.sql
+*.sql
+.agent/
+.gemini/
+migrate.sh
+verify.sh
+l$Ubuntuhomexray21projectsproject01'
+*:Zone.Identifier

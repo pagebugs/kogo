@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>KOGO Navigation</title>
+
+  <!-- SUIT Font -->
+  <link href="https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/static/stylesheet.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- =========================================================
+     HEADER (Google Antigravity Navigation Pattern)
+========================================================= -->
+<header class="header">
+  <div class="header-inner">
+    <div class="nav-container">
+
+      <div class="logo-dummy"></div>
+
+      <nav class="nav">
+        <ul class="nav-list">
+
+          <!-- 1. Overview (simple link) -->
+          <li class="nav-item" data-type="link">
+            <button class="nav-button">Overview</button>
+          </li>
+
+          <!-- 2. Use Cases (dropdown) -->
+          <li class="nav-item" data-type="dropdown">
+            <button class="nav-button" aria-expanded="false" data-panel="usecases">
+              Use Cases <i class="material-icons caret">keyboard_arrow_down</i>
+            </button>
+          </li>
+
+          <!-- 3. Products (dropdown) -->
+          <li class="nav-item" data-type="dropdown">
+            <button class="nav-button" aria-expanded="false" data-panel="products">
+              Products <i class="material-icons caret">keyboard_arrow_down</i>
+            </button>
+          </li>
+
+          <!-- 4. Resources (dropdown) -->
+          <li class="nav-item" data-type="dropdown">
+            <button class="nav-button" aria-expanded="false" data-panel="resources">
+              Resources <i class="material-icons caret">keyboard_arrow_down</i>
+            </button>
+          </li>
+
+        </ul>
+      </nav>
+
+      <div class="download-dummy"></div>
+      <button class="mobile-toggle" id="mobileToggle">☰</button>
+
+    </div>
+  </div>
+</header>
+
+
+<!-- =========================================================
+     MEGA PANELS (A, B, C Layout Templates)
+========================================================= -->
+
+<!-- Layout A (left text + right links) -->
+<div class="mega-dropdown layout-a" data-panel="usecases">
+  <div class="mega-inner">
+
+    <div class="mega-left">
+      <h3 class="mega-title">Everything you need to stay up-to-date</h3>
+      <p class="mega-desc">Documentation, changelog, support and more.</p>
+    </div>
+
+    <div class="mega-right">
+      <button class="mega-item">Documentation <i class="material-icons arrow">keyboard_arrow_right</i></button>
+      <button class="mega-item">Changelog <i class="material-icons arrow">keyboard_arrow_right</i></button>
+      <button class="mega-item">Support <i class="material-icons arrow">keyboard_arrow_right</i></button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- Layout B (3-column link grid) -->
+<div class="mega-dropdown layout-b" data-panel="products">
+  <div class="mega-inner">
+
+    <div class="mega-col">
+      <h4 class="mega-col-title">AI Products</h4>
+      <button class="mega-item">CT → MRI AI</button>
+      <button class="mega-item">Spine Diagnostics</button>
+      <button class="mega-item">Cardio Screening</button>
+    </div>
+
+    <div class="mega-col">
+      <h4 class="mega-col-title">Platforms</h4>
+      <button class="mega-item">KOGHA Cloud</button>
+      <button class="mega-item">TouchAd</button>
+      <button class="mega-item">DocQ-Mentoring</button>
+    </div>
+
+    <div class="mega-col">
+      <h4 class="mega-col-title">Developer</h4>
+      <button class="mega-item">API Docs</button>
+      <button class="mega-item">SDK Downloads</button>
+      <button class="mega-item">Case Library</button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- Layout C (icon + text list) -->
+<div class="mega-dropdown layout-c" data-panel="resources">
+  <div class="mega-inner">
+
+    <div class="mega-resource">
+      <div class="mega-icon"></div>
+      <div class="mega-text">
+        <h4>Tutorials</h4>
+        <p>Video walkthroughs and hands-on guides.</p>
+      </div>
+    </div>
+
+    <div class="mega-resource">
+      <div class="mega-icon"></div>
+      <div class="mega-text">
+        <h4>Community</h4>
+        <p>Join our forum and share insights.</p>
+      </div>
+    </div>
+
+    <div class="mega-resource">
+      <div class="mega-icon"></div>
+      <div class="mega-text">
+        <h4>Research</h4>
+        <p>Latest whitepapers and deep-dive reports.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- =========================================================
+     Mobile Menu (Accordion)
+========================================================= -->
+<div class="mobile-menu" id="mobileMenu">
+
+  <button class="mobile-item">Overview</button>
+
+  <div class="mobile-accordion" data-panel="usecases">
+    <div class="mobile-accordion-title">Use Cases ▼</div>
+    <div class="mobile-accordion-body">
+      <button>Documentation</button>
+      <button>Changelog</button>
+      <button>Support</button>
+    </div>
+  </div>
+
+  <div class="mobile-accordion" data-panel="products">
+    <div class="mobile-accordion-title">Products ▼</div>
+    <div class="mobile-accordion-body">
+      <button>AI Products</button>
+      <button>Platforms</button>
+      <button>Developer</button>
+    </div>
+  </div>
+
+  <div class="mobile-accordion" data-panel="resources">
+    <div class="mobile-accordion-title">Resources ▼</div>
+    <div class="mobile-accordion-body">
+      <button>Tutorials</button>
+      <button>Community</button>
+      <button>Research</button>
+    </div>
+  </div>
+</div>
+
+
+<script src="script.js"></script>
+
+</body>
+</html>
