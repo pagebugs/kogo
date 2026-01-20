@@ -24,7 +24,7 @@ jobs:
 
       - name: Rsync Deployment
         run: |
-          rsync -avz --exclude='.git*' --exclude='deploy_key*' --exclude='*.sql' --exclude='.agent' --exclude='.gemini' --exclude='node_modules' ./ ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/home1/kogha0000/
+          rsync -avz --exclude='.git*' --exclude='deploy_key*' --exclude='*.sql' --exclude='.agent' --exclude='.gemini' --exclude='node_modules' --exclude='.github' --exclude='.gitignore' --exclude='README.md' --exclude='package.json' --exclude='package-lock.json' ./ ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/home1/kogha0000/public_html/
         env:
           HOST: ${{ secrets.HOST }}
           USERNAME: ${{ secrets.USERNAME }}
