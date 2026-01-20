@@ -1,0 +1,15 @@
+[33mcommit 6232456dd1947f0dc6beb4007b39cba2c98ac6a7[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: pagebugs <pagebugs@gmail.com>
+Date:   Tue Jan 20 14:27:12 2026 +0900
+
+    배포
+
+ .gemini/walkthrough.md                                        | 146 [32m++++[m[31m-----------------------[m
+ .vscode/launch.json                                           |  15 [32m+++[m
+ ProjectRequirement.md                                         |   0
+ assets/css/style.css                                          |   0
+ css/styles.css                                                |   0
+ .../SaaSBluprint.pdf\357\200\272Zone.Identifier"              | Bin
+ projectInfo.md                                                |   0
+ touch/index.html                                              |   0
+ 8 files changed, 33 insertions(+), 128 deletions(-)
