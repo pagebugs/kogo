@@ -170,6 +170,9 @@
     const storedData = localStorage.getItem('touchadData');
     const parsedData = storedData ? JSON.parse(storedData) : {};
 
+    // 3. User Content (Textarea)
+    const extraContent = document.getElementById('inquiryContent')?.value.trim();
+
     const payload = {
       session_id: sessionId,
       contact: {
@@ -178,7 +181,8 @@
       },
       interest_tags: interestTags,
       sim_uuid: parsedData.sim_uuid || null,
-      context_snapshot: contextSnapshot
+      context_snapshot: contextSnapshot,
+      content: extraContent || null
     };
 
     console.log('[Sales Lead] Submitting:', payload);

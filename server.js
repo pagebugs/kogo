@@ -2,6 +2,7 @@ const express = require('express');
 const mysql = require('mysql2/promise');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const { encrypt, decrypt } = require('./utils/crypto_utils');
 
 const app = express();
 const PORT = 3000;
@@ -215,7 +216,7 @@ function requireAdminKey(req, res, next) {
 // Required: session_id, contact ({ phone, email }), context_snapshot
 // Optional: sim_uuid, interest_tags
 app.post('/api/inquiry', async (req, res) => {
-    const { session_id, sim_uuid, contact, interest_tags, context_snapshot } = req.body;
+    const { session_id, sim_uuid, contact, interest_tags, context_snapshot, content } = req.body;
 
     // Validation: Required fields
     if (!session_id || !contact || !context_snapshot) {
@@ -266,14 +267,18 @@ app.post('/api/inquiry', async (req, res) => {
         const inquiryId = generateInquiryId();
         const interestJson = interest_tags ? JSON.stringify(interest_tags) : null;
 
+        // 연락처 정보 암호화
+        const encryptedPhone = phone ? encrypt(phone) : null;
+        const encryptedEmail = email ? encrypt(email) : null;
+
         await pool.execute(
             `INSERT INTO inquiry 
-            (inquiry_id, session_id, sim_uuid, contact_phone, contact_email, interest_tags, context_snapshot, status) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, 'new')`,
-            [inquiryId, session_id, sim_uuid || null, phone, email, interestJson, contextStr]
+            (inquiry_id, session_id, sim_uuid, contact_phone, contact_email, interest_tags, context_snapshot, status, content) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, 'new', ?)`,
+            [inquiryId, session_id, sim_uuid || null, encryptedPhone, encryptedEmail, interestJson, contextStr, content || null]
         );
 
-        console.log(`[Sales Lead] Created: ${inquiryId} (Phone: ${phone}, Email: ${email})`);
+        console.log(`[Sales Lead] Created: ${inquiryId} (Phone: ${phone ? '***encrypted***' : 'N/A'}, Email: ${email ? '***encrypted***' : 'N/A'})`);
         
         res.status(201).send({ 
             success: true, 
@@ -313,6 +318,14 @@ app.post('/api/inquiry/:inquiryId/view', requireAdminKey, async (req, res) => {
         }
         if (inquiry.interest_tags && typeof inquiry.interest_tags === 'string') {
             try { inquiry.interest_tags = JSON.parse(inquiry.interest_tags); } catch (e) {}
+        }
+
+        // 연락처 정보 복호화 (Admin 조회 시)
+        if (inquiry.contact_phone) {
+            inquiry.contact_phone = decrypt(inquiry.contact_phone);
+        }
+        if (inquiry.contact_email) {
+            inquiry.contact_email = decrypt(inquiry.contact_email);
         }
 
         res.status(200).send(inquiry);
@@ -362,6 +375,504 @@ app.patch('/api/inquiry/:inquiryId/status', requireAdminKey, async (req, res) =>
 // ❌ REMOVED: Session-based inquiry list
 // Inquiry is NOT a browsable object. It's a reference captured at a specific context.
 // If listing is needed for admin, implement separately with authentication.
+
+// =========================================================
+// SimulationAccess API
+// =========================================================
+
+// Report ID 생성
+function generateReportId() {
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).substr(2, 5);
+    return `RPT-${timestamp}-${random}`.toUpperCase();
+}
+
+// 1. 시뮬레이션 접근 권한 부여
+app.post('/api/simulation-access', async (req, res) => {
+    const { sim_id, user_id, source } = req.body;
+
+    if (!sim_id || !user_id) {
+        return res.status(400).send({ 
+            error: 'Required fields: sim_id, user_id' 
+        });
+    }
+
+    const validSources = ['login', 'manual_save', 'share'];
+    const accessSource = validSources.includes(source) ? source : 'login';
+
+    try {
+        // 중복 체크 후 삽입 (ON DUPLICATE KEY UPDATE)
+        await pool.execute(
+            `INSERT INTO simulation_access (sim_id, user_id, source) 
+             VALUES (?, ?, ?)
+             ON DUPLICATE KEY UPDATE granted_at = CURRENT_TIMESTAMP, source = ?`,
+            [sim_id, user_id, accessSource, accessSource]
+        );
+
+        console.log(`[SimulationAccess] Granted: sim_id=${sim_id}, user_id=${user_id}, source=${accessSource}`);
+        res.status(201).send({ success: true, sim_id, user_id, source: accessSource });
+    } catch (err) {
+        console.error('DB Error (SimulationAccess):', err);
+        res.status(500).send({ error: 'Database error' });
+    }
+});
+
+// 2. 사용자가 접근 가능한 시뮬레이션 목록
+app.get('/api/user/:userId/simulations', async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const [rows] = await pool.execute(
+            `SELECT s.id, s.sim_uuid, s.input_data, s.result_data, s.created_at,
+                    sa.granted_at, sa.source
+             FROM simulation_access sa
+             JOIN simulation s ON sa.sim_id = s.id
+             WHERE sa.user_id = ?
+             ORDER BY sa.granted_at DESC`,
+            [userId]
+        );
+
+        // JSON 파싱
+        const simulations = rows.map(row => ({
+            ...row,
+            input_data: typeof row.input_data === 'string' ? JSON.parse(row.input_data) : row.input_data,
+            result_data: typeof row.result_data === 'string' ? JSON.parse(row.result_data) : row.result_data
+        }));
+
+        res.status(200).send({ simulations, count: simulations.length });
+    } catch (err) {
+        console.error('DB Error (User Simulations):', err);
+        res.status(500).send({ error: 'Database error' });
+    }
+});
+
+// =========================================================
+// InsightReport API
+// =========================================================
+
+// 1. Insight Report 생성
+app.post('/api/insight-report', async (req, res) => {
+    const { user_id, sim_id, title, snapshot } = req.body;
+
+    if (!user_id || !sim_id || !snapshot) {
+        return res.status(400).send({ 
+            error: 'Required fields: user_id, sim_id, snapshot' 
+        });
+    }
+
+    try {
+        // 사용자가 해당 시뮬레이션에 접근 권한이 있는지 확인
+        const [accessRows] = await pool.execute(
+            'SELECT id FROM simulation_access WHERE user_id = ? AND sim_id = ?',
+            [user_id, sim_id]
+        );
+
+        if (accessRows.length === 0) {
+            return res.status(403).send({ 
+                error: 'Access denied',
+                hint: 'User does not have access to this simulation'
+            });
+        }
+
+        const reportId = generateReportId();
+        const snapshotStr = typeof snapshot === 'object' ? JSON.stringify(snapshot) : snapshot;
+
+        await pool.execute(
+            `INSERT INTO insight_report (report_id, user_id, sim_id, title, snapshot)
+             VALUES (?, ?, ?, ?, ?)`,
+            [reportId, user_id, sim_id, title || null, snapshotStr]
+        );
+
+        console.log(`[InsightReport] Created: ${reportId} for user_id=${user_id}`);
+        res.status(201).send({ 
+            success: true, 
+            report_id: reportId,
+            message: 'Insight Report created successfully'
+        });
+    } catch (err) {
+        console.error('DB Error (InsightReport Create):', err);
+        res.status(500).send({ error: 'Database error' });
+    }
+});
+
+// 2. Insight Report 조회
+app.get('/api/insight-report/:reportId', async (req, res) => {
+    const { reportId } = req.params;
+
+    try {
+        const [rows] = await pool.execute(
+            `SELECT ir.*, s.sim_uuid, s.input_data as sim_input, s.result_data as sim_result
+             FROM insight_report ir
+             JOIN simulation s ON ir.sim_id = s.id
+             WHERE ir.report_id = ?`,
+            [reportId]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).send({ error: 'Report not found' });
+        }
+
+        const report = rows[0];
+        
+        // JSON 파싱
+        if (typeof report.snapshot === 'string') {
+            try { report.snapshot = JSON.parse(report.snapshot); } catch (e) {}
+        }
+        if (typeof report.sim_input === 'string') {
+            try { report.sim_input = JSON.parse(report.sim_input); } catch (e) {}
+        }
+        if (typeof report.sim_result === 'string') {
+            try { report.sim_result = JSON.parse(report.sim_result); } catch (e) {}
+        }
+
+        res.status(200).send(report);
+    } catch (err) {
+        console.error('DB Error (InsightReport Get):', err);
+        res.status(500).send({ error: 'Database error' });
+    }
+});
+
+// 3. 사용자의 Insight Report 목록
+app.get('/api/user/:userId/reports', async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const [rows] = await pool.execute(
+            `SELECT ir.report_id, ir.title, ir.generated_at, ir.updated_at,
+                    s.sim_uuid
+             FROM insight_report ir
+             JOIN simulation s ON ir.sim_id = s.id
+             WHERE ir.user_id = ?
+             ORDER BY ir.generated_at DESC`,
+            [userId]
+        );
+
+        res.status(200).send({ reports: rows, count: rows.length });
+    } catch (err) {
+        console.error('DB Error (User Reports):', err);
+        res.status(500).send({ error: 'Database error' });
+    }
+});
+
+// =========================================================
+// Order API
+// =========================================================
+
+// Order ID 생성
+function generateOrderId() {
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).substr(2, 5);
+    return `ORD-${timestamp}-${random}`.toUpperCase();
+}
+
+// 1. Order 생성 (User용 - 비활성화, 미래 Phase용 유지)
+// ⚠️ Phase 정책: Admin만 Order 생성 가능
+app.post('/api/order', async (req, res) => {
+    // 현재 Phase에서는 User의 Order 생성 불가
+    return res.status(403).send({ 
+        error: 'Order creation is restricted',
+        message: 'Orders can only be created by Admin. Contact support for assistance.',
+        hint: 'This endpoint will be enabled in a future phase.'
+    });
+});
+
+// 1-1. Admin용 Order 생성 (신규)
+app.post('/api/admin/order', requireAdminKey, async (req, res) => {
+    const { inquiry_id, report_id, memo, amount } = req.body;
+
+    // inquiry_id 또는 report_id 중 하나 필수
+    if (!inquiry_id && !report_id) {
+        return res.status(400).send({ 
+            error: 'Either inquiry_id or report_id is required' 
+        });
+    }
+
+    try {
+        // 중복 Order 방지: inquiry_id로 이미 Order가 있는지 확인
+        if (inquiry_id) {
+            const [existing] = await pool.execute(
+                'SELECT order_id FROM `order` WHERE inquiry_id = ?',
+                [inquiry_id]
+            );
+            if (existing.length > 0) {
+                return res.status(409).send({ 
+                    error: 'Order already exists for this inquiry',
+                    existing_order_id: existing[0].order_id
+                });
+            }
+
+            // Inquiry 존재 여부 확인 (inquiry_id는 VARCHAR, 예: "INQ-XXXXXX")
+            const [inqRows] = await pool.execute(
+                'SELECT id, inquiry_id, status FROM inquiry WHERE inquiry_id = ?',
+                [inquiry_id]
+            );
+            if (inqRows.length === 0) {
+                return res.status(400).send({ error: 'Inquiry not found' });
+            }
+        }
+
+        // Order 생성
+        const orderId = generateOrderId();
+        
+        await pool.execute(
+            `INSERT INTO \`order\` (order_id, inquiry_id, report_id, memo, status, amount)
+             VALUES (?, ?, ?, ?, 'DRAFT', ?)`,
+            [orderId, inquiry_id || null, report_id || null, memo || null, amount || 0]
+        );
+
+        // Inquiry 상태를 'converted'로 전환
+        if (inquiry_id) {
+            await pool.execute(
+                "UPDATE inquiry SET status = 'converted' WHERE inquiry_id = ?",
+                [inquiry_id]
+            );
+        }
+
+        console.log(`[Admin Order] Created: ${orderId} (inquiry_id=${inquiry_id || 'N/A'})`);
+        res.status(201).send({ 
+            success: true, 
+            order_id: orderId,
+            status: 'DRAFT'
+        });
+    } catch (err) {
+        console.error('DB Error (Admin Order Create):', err);
+        res.status(500).send({ error: 'Database error' });
+    }
+});
+
+// 2. Order 조회
+app.get('/api/order/:orderId', async (req, res) => {
+    const { orderId } = req.params;
+
+    try {
+        const [rows] = await pool.execute(
+            `SELECT * FROM \`order\` WHERE order_id = ?`,
+            [orderId]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).send({ error: 'Order not found' });
+        }
+
+        const order = rows[0];
+        
+        // JSON 파싱
+        if (typeof order.sim_snapshot === 'string') {
+            try { order.sim_snapshot = JSON.parse(order.sim_snapshot); } catch (e) {}
+        }
+
+        res.status(200).send(order);
+    } catch (err) {
+        console.error('DB Error (Order Get):', err);
+        res.status(500).send({ error: 'Database error' });
+    }
+});
+
+// 3. Order 상태 업데이트 (Admin only)
+app.patch('/api/order/:orderId/status', requireAdminKey, async (req, res) => {
+    const { orderId } = req.params;
+    const { status, runcomm_ref, note } = req.body;
+
+    const validStatuses = ['DRAFT', 'CONFIRMED', 'ORDERED', 'RUNNING', 'DONE', 'CANCELLED'];
+    if (!status || !validStatuses.includes(status)) {
+        return res.status(400).send({ 
+            error: 'Invalid status',
+            valid_statuses: validStatuses
+        });
+    }
+
+    try {
+        // runcomm_ref가 있으면 runcomm_sent_at도 업데이트
+        let query, params;
+        if (runcomm_ref) {
+            query = `UPDATE \`order\` SET status = ?, runcomm_ref = ?, runcomm_sent_at = CURRENT_TIMESTAMP, 
+                     note = COALESCE(?, note) WHERE order_id = ?`;
+            params = [status, runcomm_ref, note, orderId];
+        } else {
+            query = `UPDATE \`order\` SET status = ?, note = COALESCE(?, note) WHERE order_id = ?`;
+            params = [status, note, orderId];
+        }
+
+        const [result] = await pool.execute(query, params);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).send({ error: 'Order not found' });
+        }
+
+        console.log(`[Order] Status updated: ${orderId} → ${status}`);
+        res.status(200).send({ success: true, status });
+    } catch (err) {
+        console.error('DB Error (Order Status):', err);
+        res.status(500).send({ error: 'Database error' });
+    }
+});
+
+// 4. 사용자의 Order 목록
+app.get('/api/user/:userId/orders', async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const [rows] = await pool.execute(
+            `SELECT order_id, amount, status, runcomm_ref, created_at, updated_at
+             FROM \`order\` WHERE user_id = ?
+             ORDER BY created_at DESC`,
+            [userId]
+        );
+
+        res.status(200).send({ orders: rows, count: rows.length });
+    } catch (err) {
+        console.error('DB Error (User Orders):', err);
+        res.status(500).send({ error: 'Database error' });
+    }
+});
+
+// =========================================================
+// Admin API
+// =========================================================
+
+// 1. Inquiry 리스트 (Admin only)
+app.get('/api/admin/inquiries', requireAdminKey, async (req, res) => {
+    const { status, page = 1, limit = 20 } = req.query;
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+
+    try {
+        // 총 개수 조회
+        let countQuery = 'SELECT COUNT(*) as total FROM inquiry';
+        let countParams = [];
+        if (status) {
+            countQuery += ' WHERE status = ?';
+            countParams.push(status);
+        }
+        const [[{ total }]] = await pool.execute(countQuery, countParams);
+
+        // 리스트 조회
+        let query = `SELECT inquiry_id, session_id, sim_uuid, 
+                            contact_phone, contact_email, status, 
+                            created_at, updated_at
+                     FROM inquiry`;
+        let params = [];
+        if (status) {
+            query += ' WHERE status = ?';
+            params.push(status);
+        }
+        query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
+        params.push(parseInt(limit), offset);
+
+        const [rows] = await pool.execute(query, params);
+
+        // contact 정보 복호화
+        const inquiries = rows.map(row => ({
+            ...row,
+            contact_phone: row.contact_phone ? decrypt(row.contact_phone) : null,
+            contact_email: row.contact_email ? decrypt(row.contact_email) : null
+        }));
+
+        res.status(200).send({
+            inquiries,
+            pagination: {
+                total,
+                page: parseInt(page),
+                limit: parseInt(limit),
+                totalPages: Math.ceil(total / parseInt(limit))
+            }
+        });
+    } catch (err) {
+        console.error('DB Error (Admin Inquiries):', err);
+        res.status(500).send({ error: 'Database error' });
+    }
+});
+
+// 2. Order 리스트 (Admin only)
+app.get('/api/admin/orders', requireAdminKey, async (req, res) => {
+    const { status, page = 1, limit = 20 } = req.query;
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+
+    try {
+        // 총 개수 조회
+        let countQuery = 'SELECT COUNT(*) as total FROM `order`';
+        let countParams = [];
+        if (status) {
+            countQuery += ' WHERE status = ?';
+            countParams.push(status);
+        }
+        const [[{ total }]] = await pool.execute(countQuery, countParams);
+
+        // 리스트 조회
+        let query = `SELECT o.order_id, o.user_id, o.amount, o.status, 
+                            o.runcomm_ref, o.runcomm_sent_at, o.created_at,
+                            u.email as user_email, u.name as user_name
+                     FROM \`order\` o
+                     LEFT JOIN user u ON o.user_id = u.id`;
+        let params = [];
+        if (status) {
+            query += ' WHERE o.status = ?';
+            params.push(status);
+        }
+        query += ' ORDER BY o.created_at DESC LIMIT ? OFFSET ?';
+        params.push(parseInt(limit), offset);
+
+        const [rows] = await pool.execute(query, params);
+
+        res.status(200).send({
+            orders: rows,
+            pagination: {
+                total,
+                page: parseInt(page),
+                limit: parseInt(limit),
+                totalPages: Math.ceil(total / parseInt(limit))
+            }
+        });
+    } catch (err) {
+        console.error('DB Error (Admin Orders):', err);
+        res.status(500).send({ error: 'Database error' });
+    }
+});
+
+// 3. Admin 대시보드 통계
+app.get('/api/admin/stats', requireAdminKey, async (req, res) => {
+    try {
+        // Inquiry 통계
+        const [[inquiryStats]] = await pool.execute(`
+            SELECT 
+                COUNT(*) as total,
+                SUM(CASE WHEN status = 'new' THEN 1 ELSE 0 END) as new_count,
+                SUM(CASE WHEN status = 'contacted' THEN 1 ELSE 0 END) as contacted_count,
+                SUM(CASE WHEN status = 'qualified' THEN 1 ELSE 0 END) as qualified_count,
+                SUM(CASE WHEN status = 'converted' THEN 1 ELSE 0 END) as converted_count
+            FROM inquiry
+        `);
+
+        // Order 통계
+        const [[orderStats]] = await pool.execute(`
+            SELECT 
+                COUNT(*) as total,
+                SUM(CASE WHEN status = 'ORDERED' THEN 1 ELSE 0 END) as ordered_count,
+                SUM(CASE WHEN status = 'RUNNING' THEN 1 ELSE 0 END) as running_count,
+                SUM(CASE WHEN status = 'DONE' THEN 1 ELSE 0 END) as done_count,
+                SUM(amount) as total_amount,
+                SUM(CASE WHEN status = 'DONE' THEN amount ELSE 0 END) as completed_amount
+            FROM \`order\`
+        `);
+
+        // 오늘 통계
+        const [[todayStats]] = await pool.execute(`
+            SELECT 
+                (SELECT COUNT(*) FROM inquiry WHERE DATE(created_at) = CURDATE()) as inquiries_today,
+                (SELECT COUNT(*) FROM \`order\` WHERE DATE(created_at) = CURDATE()) as orders_today,
+                (SELECT COUNT(*) FROM simulation WHERE DATE(created_at) = CURDATE()) as simulations_today,
+                (SELECT COUNT(*) FROM session WHERE DATE(created_at) = CURDATE()) as sessions_today
+        `);
+
+        res.status(200).send({
+            inquiry: inquiryStats,
+            order: orderStats,
+            today: todayStats
+        });
+    } catch (err) {
+        console.error('DB Error (Admin Stats):', err);
+        res.status(500).send({ error: 'Database error' });
+    }
+});
 
 // Start Server
 app.listen(PORT, () => {
