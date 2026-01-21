@@ -556,11 +556,25 @@
             console.log("====================");
 
             // [New] 시뮬레이션 저장 및 로그
+            // decisionSnapshot: Admin Order 생성 시 판단 근거로 사용 (Front는 준비만)
+            const decisionSnapshot = {
+              total: dunjugoValues[0]?.value || 0,
+              age_target: dunjugoValues[1]?.value || 0,
+              gender_target: dunjugoValues[2]?.value || 0,
+              precision_rate: dunjugoValues[0]?.value > 0 ? ((dunjugoValues[1]?.value / dunjugoValues[0]?.value) * 100).toFixed(1) : 0,
+              relevance_rate: dunjugoValues[0]?.value > 0 ? ((dunjugoValues[2]?.value / dunjugoValues[0]?.value) * 100).toFixed(1) : 0,
+              hospital_name: hospitalAddressInput.value,
+              calculated_at: new Date().toISOString()
+            };
+            localStorage.setItem('pending_decision_snapshot', JSON.stringify(decisionSnapshot));
+            console.log('[DecisionSnapshot] Prepared (pending_decision_snapshot):', decisionSnapshot);
+
             await saveSimulation(
                 { 
                     address: hospitalAddressInput.value,
                     postcode: postcode,
-                    filters: { gender: '여성', age: '30대' } // 현재 하드코딩된 필터
+                    filters: { gender: '여성', age: '30대' }, // 현재 하드코딩된 필터
+                    source_page: 'index.html' // DB source_type 동기화용
                 },
                 { 
                     resData: apiData, 

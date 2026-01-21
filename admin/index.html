@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TouchAd Admin - Dashboard</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="./assets/css/admin.css">
+    <!-- SUIT Font -->
+    <link href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT/fonts/variable/woff2/SUIT-Variable.css" rel="stylesheet">
+</head>
+<body class="admin-body">
+
+    <!-- Header -->
+    <header class="admin-header">
+        <div class="admin-logo">TouchAd Admin</div>
+        <nav class="admin-nav">
+            <a href="index.html" class="active">Dashboard</a>
+            <a href="inquiry_list.html">Inquiry (Sales)</a>
+            <a href="order_list.html">Orders</a>
+        </nav>
+        <div class="admin-user-info text-small">
+            Manager님
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="admin-container">
+        
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-title">Today Inquiry</div>
+                <div class="kpi-value">12</div>
+                <div class="kpi-trend text-small">
+                    <span style="color: var(--status-new-text);">▲ 2</span> from yesterday
+                </div>
+            </div>
+            <div class="kpi-card card-emphasis" onclick="location.href='inquiry_list.html?status=qualified'">
+                <div class="kpi-title">Ready to Order (Qualified)</div>
+                <div class="kpi-value">3</div>
+                <div class="kpi-trend text-small">Action Required (클릭하여 이동)</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-title">Avg Conversion Time</div>
+                <div class="kpi-value">2.4<span class="text-small" style="font-weight:400; color:#666"> days</span></div>
+                <div class="kpi-trend text-small">-0.2 days faster</div>
+            </div>
+        </div>
+
+        <h2 class="section-title" style="text-align: left; margin-bottom: 20px; font-size: 1.25rem;">Recent Inquiries</h2>
+        
+        <!-- Recent Inquiry Table -->
+        <div class="data-table-wrapper mb-8">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 100px;">Status</th>
+                        <th style="width: 120px;">Time</th>
+                        <th>Total Population</th>
+                        <th>Target Context</th>
+                        <th>Hospital Name</th>
+                        <th style="width: 80px;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="badge badge-new">NEW</span></td>
+                        <td>10 mins ago</td>
+                        <td><span class="text-value-high">52,400</span></td>
+                        <td><div class="text-sub">강남구 / 30-40대 / 여성</div></td>
+                        <td>서울재활의학과의원</td>
+                        <td><a href="inquiry_detail.html" class="btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;">View</a></td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-new">NEW</span></td>
+                        <td>45 mins ago</td>
+                        <td><span class="text-value-high">18,200</span></td>
+                        <td><div class="text-sub">송파구 / 40-50대 / 남성</div></td>
+                        <td>(미입력)</td>
+                        <td><a href="inquiry_detail.html" class="btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;">View</a></td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-contacted">CONTACTED</span></td>
+                        <td>3 hours ago</td>
+                        <td>3,200</td>
+                        <td><div class="text-sub">마포구 / 20대 / 여성</div></td>
+                        <td>연세피부과</td>
+                        <td><a href="inquiry_detail.html" class="btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;">View</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h2 class="section-title" style="text-align: left; margin-bottom: 20px; font-size: 1.25rem;">Recent Orders</h2>
+        
+        <!-- Recent Order Preview (Simple List) -->
+        <div class="data-table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Order ID</th>
+                        <th>Amount</th>
+                        <th>Linked Query</th>
+                        <th>Executor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="badge badge-qualified">CONFIRMED</span></td>
+                        <td>ORD-20240121-001</td>
+                        <td>3,000,000 원</td>
+                        <td>INQ-8829</td>
+                        <td>Manager Kim</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+
+    <script src="./assets/js/admin.js"></script>
+</body>
+</html>

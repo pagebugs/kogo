@@ -1,0 +1,263 @@
+/* Admin Mode Styles */
+:root {
+  /* Admin Specific Colors */
+  --color-admin-bg: #f8f9fa;
+  --color-admin-sidebar: #1a1a1a;
+  --color-admin-primary: #000000;
+  
+  /* Status Colors */
+  --status-new-bg: #ffebee;
+  --status-new-text: #c62828;
+  --status-contacted-bg: #fffde7;
+  --status-contacted-text: #f9a825;
+  --status-qualified-bg: #e3f2fd;
+  --status-qualified-text: #1565c0;
+  --status-converted-bg: #e8f5e9;
+  --status-converted-text: #2e7d32;
+}
+
+body.admin-body {
+  background-color: var(--color-admin-bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Admin Layout */
+.admin-header {
+  height: 60px;
+  background: white;
+  border-bottom: 1px solid var(--color-border-gray);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-6);
+  justify-content: space-between;
+}
+
+.admin-logo {
+  font-weight: 800;
+  font-size: 1.2rem;
+  letter-spacing: -0.5px;
+}
+
+.admin-nav a {
+  margin-left: var(--space-6);
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-medium-gray);
+}
+
+.admin-nav a.active {
+  color: var(--color-black);
+  padding-bottom: 2px;
+  border-bottom: 2px solid var(--color-black);
+}
+
+.admin-container {
+  max-width: 1400px; /* Wider than main site for data */
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--space-8);
+  flex: 1;
+}
+
+/* Dashboard Cards */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-6);
+  margin-bottom: var(--space-8);
+}
+
+.kpi-card {
+  background: white;
+  padding: var(--space-6);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--color-border-gray);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.kpi-title {
+  font-size: 0.875rem;
+  color: var(--color-medium-gray);
+  margin-bottom: var(--space-2);
+  font-weight: 600;
+}
+
+.kpi-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-black);
+  line-height: 1;
+}
+
+.kpi-trend {
+  font-size: 0.875rem;
+  margin-top: var(--space-2);
+  color: var(--color-medium-gray);
+}
+
+/* Data Table */
+.data-table-wrapper {
+  background: white;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--color-border-gray);
+  overflow: hidden;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th {
+  background: #f8f9fa;
+  text-align: left;
+  padding: var(--space-3) var(--space-4);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--color-medium-gray);
+  font-weight: 600;
+  border-bottom: 1px solid var(--color-border-gray);
+}
+
+.data-table td {
+  padding: var(--space-4);
+  font-size: 0.9rem;
+  border-bottom: 1px solid #eee;
+  vertical-align: middle;
+}
+
+.data-table tr:hover {
+  background-color: #fcfcfc;
+}
+
+/* Status Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.badge-new { background: var(--status-new-bg); color: var(--status-new-text); }
+.badge-contacted { background: var(--status-contacted-bg); color: var(--status-contacted-text); }
+.badge-qualified { background: var(--status-qualified-bg); color: var(--status-qualified-text); }
+.badge-converted { background: var(--status-converted-bg); color: var(--status-converted-text); }
+
+/* Typography Emphases */
+.text-value-high {
+  font-weight: 700;
+  font-size: 1.1em;
+  color: var(--color-black);
+}
+
+.text-sub {
+  font-size: 0.85em;
+  color: var(--color-medium-gray);
+}
+
+/* Detail View Layout */
+.detail-grid {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: var(--space-8);
+}
+
+.detail-section {
+  background: white;
+  border: 1px solid var(--color-border-gray);
+  border-radius: var(--border-radius);
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+
+.detail-header {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Filters */
+.filter-bar {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  align-items: center;
+}
+
+.filter-select {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border-gray);
+  border-radius: 4px;
+  background: white;
+  font-size: 0.9rem;
+}
+
+/* Action Button */
+.btn-primary {
+  background: var(--color-black);
+  color: white;
+  border: none;
+  padding: var(--space-3) var(--space-6);
+  border-radius: 4px;
+  font-weight: 600;
+}
+.btn-primary:disabled {
+  background: var(--color-light-gray);
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: white;
+  border: 1px solid var(--color-border-gray);
+  padding: var(--space-3) var(--space-6);
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* UI 개선을 위한 유틸리티 클래스 (UI Improvements) */
+.card-emphasis {
+  border: 1px solid #2196F3; /* 파란색 강조 테두리 */
+  background-color: #e3f2fd; /* 옅은 파란색 배경 */
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-emphasis:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(33, 150, 243, 0.2);
+}
+
+.text-signal {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #d32f2f; /* 빨간색 강조 */
+  background: #ffebee;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.summary-box {
+  background: #212121; /* 다크 모드 스타일 */
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  line-height: 1.4;
+  border-left: 4px solid #4caf50; /* 초록색 포인트 */
+}

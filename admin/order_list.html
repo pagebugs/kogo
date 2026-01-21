@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TouchAd Admin - Order List</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="./assets/css/admin.css">
+    <link href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT/fonts/variable/woff2/SUIT-Variable.css" rel="stylesheet">
+</head>
+<body class="admin-body">
+
+    <header class="admin-header">
+        <div class="admin-logo">TouchAd Admin</div>
+        <nav class="admin-nav">
+            <a href="index.html">Dashboard</a>
+            <a href="inquiry_list.html">Inquiry (Sales)</a>
+            <a href="order_list.html" class="active">Orders</a>
+        </nav>
+        <div class="admin-user-info text-small">Manager님</div>
+    </header>
+
+    <main class="admin-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 class="section-title" style="text-align: left; margin: 0; font-size: 1.5rem;">Order Management</h2>
+            <button class="btn-primary" style="font-size: 0.9rem;">+ Manual Order</button>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <select class="filter-select">
+                <option value="all">Status (All)</option>
+                <option value="draft">DRAFT (작성중)</option>
+                <option value="confirmed">CONFIRMED (확정)</option>
+                <option value="running">RUNNING (집행중)</option>
+                <option value="done">DONE (완료)</option>
+            </select>
+            <input type="text" placeholder="Search Order ID..." class="filter-select" style="min-width: 200px;">
+        </div>
+
+        <!-- Order Table -->
+        <div class="data-table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 100px;">Status</th>
+                        <th style="width: 150px;">Order ID</th>
+                        <th>Linked Inquiry</th>
+                        <th style="text-align: right;">Amount (KRW)</th>
+                        <th style="width: 150px;">Created Date</th>
+                        <th>Admin Memo</th>
+                        <th style="width: 80px;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="badge badge-converted">CONFIRMED</span></td>
+                        <td style="font-weight: 600;">ORD-20240121-001</td>
+                        <td><a href="inquiry_detail.html" style="text-decoration: underline; color: #666;">INQ-8829</a></td>
+                        <td style="text-align: right; font-weight: 700;">3,000,000</td>
+                        <td>2024-01-21</td>
+                        <td>계약금 입금 완료</td>
+                        <td><button class="btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;">Edit</button></td>
+                    </tr>
+                    <tr>
+                        <td><span class="badge badge-qualified">DRAFT</span></td>
+                        <td style="font-weight: 600;">ORD-20240120-005</td>
+                        <td><a href="inquiry_detail.html" style="text-decoration: underline; color: #666;">INQ-8812</a></td>
+                        <td style="text-align: right; font-weight: 700;">-</td>
+                        <td>2024-01-20</td>
+                        <td>견적 조율 중</td>
+                        <td><button class="btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;">Edit</button></td>
+                    </tr>
+                    <tr style="background-color: #f9f9f9; color: #999;">
+                        <td><span class="badge" style="background: #eee; color: #666;">DONE</span></td>
+                        <td style="font-weight: 600;">ORD-20231215-002</td>
+                        <td><a href="#" style="text-decoration: underline; color: #999;">INQ-7740</a></td>
+                        <td style="text-align: right; font-weight: 700;">5,500,000</td>
+                        <td>2023-12-15</td>
+                        <td>12월 집행 완료건</td>
+                        <td><button class="btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;">View</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</body>
+</html>

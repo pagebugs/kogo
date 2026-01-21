@@ -216,7 +216,7 @@ function requireAdminKey(req, res, next) {
 // Required: session_id, contact ({ phone, email }), context_snapshot
 // Optional: sim_uuid, interest_tags
 app.post('/api/inquiry', async (req, res) => {
-    const { session_id, sim_uuid, contact, interest_tags, context_snapshot, content } = req.body;
+    const { session_id, sim_uuid, contact, interest_tags, context_snapshot, content, source_type, source_page, meta } = req.body;
 
     // Validation: Required fields
     if (!session_id || !contact || !context_snapshot) {
@@ -236,6 +236,10 @@ app.post('/api/inquiry', async (req, res) => {
             hint: 'At least one of contact.phone or contact.email is required'
         });
     }
+
+    // Validation: source_type (optional, default to null)
+    const validSourceTypes = ['analysis', 'simulation', 'direct'];
+    const sourceTypeValue = validSourceTypes.includes(source_type) ? source_type : null;
 
     // Validation: context_snapshot size limit
     const contextStr = typeof context_snapshot === 'object' 
@@ -271,14 +275,28 @@ app.post('/api/inquiry', async (req, res) => {
         const encryptedPhone = phone ? encrypt(phone) : null;
         const encryptedEmail = email ? encrypt(email) : null;
 
+        // meta를 context_snapshot._meta로 병합 (A안: 가볍게 처리)
+        let enrichedContextStr = contextStr;
+        if (meta) {
+            try {
+                const parsedContext = JSON.parse(contextStr);
+                parsedContext._meta = meta;
+                enrichedContextStr = JSON.stringify(parsedContext);
+            } catch (e) {
+                // context_snapshot이 JSON이 아닌 경우 무시
+                console.warn('[Sales Lead] meta merge failed, context is not valid JSON');
+            }
+        }
+
+        // source_type, source_page 필드 추가 (Phase 1 DB 스키마 동기화)
         await pool.execute(
             `INSERT INTO inquiry 
-            (inquiry_id, session_id, sim_uuid, contact_phone, contact_email, interest_tags, context_snapshot, status, content) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, 'new', ?)`,
-            [inquiryId, session_id, sim_uuid || null, encryptedPhone, encryptedEmail, interestJson, contextStr, content || null]
+            (inquiry_id, session_id, sim_uuid, contact_phone, contact_email, interest_tags, context_snapshot, status, content, source_type, source_page) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, 'new', ?, ?, ?)`,
+            [inquiryId, session_id, sim_uuid || null, encryptedPhone, encryptedEmail, interestJson, enrichedContextStr, content || null, sourceTypeValue, source_page || null]
         );
 
-        console.log(`[Sales Lead] Created: ${inquiryId} (Phone: ${phone ? '***encrypted***' : 'N/A'}, Email: ${email ? '***encrypted***' : 'N/A'})`);
+        console.log(`[Sales Lead] Created: ${inquiryId} (source_type: ${sourceTypeValue || 'N/A'}, source_page: ${source_page || 'N/A'})`);
         
         res.status(201).send({ 
             success: true, 

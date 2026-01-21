@@ -12,7 +12,9 @@
 (function() {
   'use strict';
 
-  const ORDER_THRESHOLD = 5000; // 조건부 Order 노출 기준값
+  // ⚠️ UX hint only. NOT used for actual Order decision.
+  // Admin Order 생성 조건과 절대 연결되면 안 됨
+  const ORDER_THRESHOLD = 5000; // 조건부 Order CTA 노출 기준값
   const API_BASE = 'http://localhost:3000';
 
   // Modal Elements
@@ -23,7 +25,8 @@
   let dashboardData = {
     baseTotal: 0,
     baseAge: 0,
-    baseGender: 0
+    baseGender: 0,
+    source_page: 'newresult.html' // 기본값
   };
 
   /**
@@ -94,7 +97,7 @@
       session_id: sessionId,
       simulation_id: parsedData.sim_uuid || null,
       hospital_name: parsedData.hospitalName || parsedData.generalData?.addressBase || '체험 병원',
-      source_page: 'newresult.html',
+      source_page: dashboardData.source_page, // 외부 주입된 source_page 사용
       captured_at: new Date().toISOString(),
       resData_snapshot: {
         total: dashboardData.baseTotal,
@@ -175,6 +178,9 @@
 
     const payload = {
       session_id: sessionId,
+      // DB 스키마 동기화: source_type, source_page 명시
+      source_type: 'analysis', // ENUM: 'analysis' | 'simulation' | 'direct'
+      source_page: dashboardData.source_page,
       contact: {
         phone: phone,
         email: email || null
@@ -182,7 +188,12 @@
       interest_tags: interestTags,
       sim_uuid: parsedData.sim_uuid || null,
       context_snapshot: contextSnapshot,
-      content: extraContent || null
+      content: extraContent || null,
+      // 미래 InsightReport/SimulationAccess 연동 대비 메타
+      meta: {
+        report_version: 'v1.0',
+        access_reason: 'public_analysis'
+      }
     };
 
     console.log('[Sales Lead] Submitting:', payload);

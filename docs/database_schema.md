@@ -30,6 +30,8 @@ Last Updated: 2026-01-21
 | **session_id** | varchar(64) | NOT NULL | MUL | NULL |  | Session 참조 (FK) |
 | **sim_uuid** | varchar(50) | NULL | MUL | NULL |  | 관련 Simulation UUID (optional) |
 | **context_snapshot** | longtext | NULL |  | NULL |  | Simulation context snapshot at inquiry creation time |
+| **source_type** | enum('analysis','simulation','direct') | NULL |  | NULL |  | Entry point tracking (analysis, simulation, direct) |
+| **source_page** | varchar(255) | NULL |  | NULL |  | Entry page URL (index.html, newresult.html 등) |
 | **title** | varchar(200) | NULL |  | NULL |  | [DEPRECATED] 제목 - Sales Lead로 전환됨 |
 | **content** | text | NULL |  | NULL |  | 사용자 추가 문의/요청 내용 |
 | **contact_info** | varchar(255) | NULL |  | NULL |  | DEPRECATED - Do not use for Contextual Inquiry |
@@ -42,6 +44,7 @@ Last Updated: 2026-01-21
 | **contact_phone** | varchar(255) | NULL |  | NULL |  | 연락처 전화번호 (암호화됨) |
 | **contact_email** | varchar(500) | NULL |  | NULL |  | 연락처 이메일 (암호화됨) |
 | **interest_tags** | longtext | NULL |  | NULL |  | 관심 포인트 태그 배열 |
+| **archived_at** | timestamp | NULL |  | NULL |  | Soft delete (숨김 처리) |
 
 ## insight_report
 | Column | Type | Null | Key | Default | Extra | Comment |
@@ -52,8 +55,10 @@ Last Updated: 2026-01-21
 | **sim_id** | int(11) | NOT NULL | MUL | NULL |  | Simulation ID (FK) - 원본 시뮬레이션 |
 | **title** | varchar(255) | NULL |  | NULL |  | 리포트 제목 (사용자 지정) |
 | **snapshot** | longtext | NOT NULL |  | NULL |  | 계산 결과 요약 스냅샷 |
+| **report_version** | varchar(10) | NULL |  | NULL |  | 리포트 로직 버전 (v1.0 등) |
 | **generated_at** | datetime | NULL | MUL | current_timestamp() |  | 생성 시각 |
 | **updated_at** | datetime | NULL |  | current_timestamp() | on update current_timestamp() |  |
+| **archived_at** | timestamp | NULL |  | NULL |  | Soft delete |
 
 ## order
 | Column | Type | Null | Key | Default | Extra | Comment |
@@ -70,6 +75,9 @@ Last Updated: 2026-01-21
 | **runcomm_sent_at** | datetime | NULL |  | NULL |  | Runcomm 전달 시각 |
 | **note** | text | NULL |  | NULL |  | 관리자 메모 |
 | **memo** | text | NULL |  | NULL |  | Admin 메모 (컨택 기록 등) |
+| **created_by_admin_id** | varchar(64) | NULL |  | NULL |  | Admin ID (책임 소재) |
+| **decision_snapshot** | json | NULL |  | NULL |  | Order 생성 시점의 판단 근거 (Total, Target 등) |
+| **archived_at** | timestamp | NULL |  | NULL |  | Soft delete |
 | **created_at** | datetime | NULL | MUL | current_timestamp() |  |  |
 | **updated_at** | datetime | NULL |  | current_timestamp() | on update current_timestamp() |  |
 
@@ -104,7 +112,8 @@ Last Updated: 2026-01-21
 | **sim_id** | int(11) | NOT NULL | MUL | NULL |  | Simulation ID (FK) |
 | **user_id** | int(11) | NOT NULL | MUL | NULL |  | User ID (FK) |
 | **granted_at** | datetime | NULL | MUL | current_timestamp() |  | 권한 부여 시각 |
-| **source** | enum('login','manual_save','share') | NULL |  | login |  | 권한 부여 경로: login=로그인 시 자동, manual_save=명시적 저장, share=공유받음 |
+| **source** | enum('login','manual_save','share') | NULL |  | login |  | 권한 부여 경로 |
+| **grant_reason** | enum('login','manual','share') | NULL |  | NULL |  | 권한 부여 상세 사유 (Audit trail) |
 
 ## user
 | Column | Type | Null | Key | Default | Extra | Comment |

@@ -1,0 +1,4 @@
+nohup: ignoring input
+[Crypto] WARNING: ENCRYPTION_KEY must be exactly 32 bytes. Using padded/truncated key.
+Server is running on http://localhost:3000
+Database connected successfully

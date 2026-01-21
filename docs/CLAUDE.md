@@ -63,4 +63,4 @@ See `.agent/agent.md` for AI agent behavior guidelines. Key principles:
 
 ## Communication
 
-한글로 커뮤니케이션 (Communicate in Korean).
+한글로 커뮤니케이션 (Communicate in Korean). 주석작업, 문서작업 포함

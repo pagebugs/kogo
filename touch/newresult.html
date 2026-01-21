@@ -590,7 +590,12 @@
         }
         
         if (window.InquiryModule) {
-          window.InquiryModule.init({ baseTotal, baseAge, baseGender });
+          window.InquiryModule.init({ 
+            baseTotal, 
+            baseAge, 
+            baseGender,
+            source_page: 'newresult.html' // DB source_type 동기화용
+          });
         }
       }, 100);
     });
