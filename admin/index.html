@@ -27,74 +27,49 @@
     <!-- Main Content -->
     <main class="admin-container">
         
-        <!-- KPI Cards -->
+        <!-- KPI Cards (동적 로드) -->
         <div class="kpi-grid">
             <div class="kpi-card">
-                <div class="kpi-title">Today Inquiry</div>
-                <div class="kpi-value">12</div>
-                <div class="kpi-trend text-small">
-                    <span style="color: var(--status-new-text);">▲ 2</span> from yesterday
-                </div>
+                <div class="kpi-title">Total Inquiries</div>
+                <div class="kpi-value" id="kpiTotal">-</div>
+                <div class="kpi-trend text-small" id="kpiTotalTrend">Loading...</div>
             </div>
-            <div class="kpi-card card-emphasis" onclick="location.href='inquiry_list.html?status=qualified'">
+            <div class="kpi-card card-emphasis" onclick="location.href='inquiry_list.html?status=qualified'" style="cursor:pointer;">
                 <div class="kpi-title">Ready to Order (Qualified)</div>
-                <div class="kpi-value">3</div>
+                <div class="kpi-value" id="kpiQualified">-</div>
                 <div class="kpi-trend text-small">Action Required (클릭하여 이동)</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-title">Avg Conversion Time</div>
-                <div class="kpi-value">2.4<span class="text-small" style="font-weight:400; color:#666"> days</span></div>
-                <div class="kpi-trend text-small">-0.2 days faster</div>
+                <div class="kpi-title">New Inquiries</div>
+                <div class="kpi-value" id="kpiNew">-</div>
+                <div class="kpi-trend text-small">처리 대기 중</div>
             </div>
         </div>
 
         <h2 class="section-title" style="text-align: left; margin-bottom: 20px; font-size: 1.25rem;">Recent Inquiries</h2>
         
-        <!-- Recent Inquiry Table -->
+        <!-- Recent Inquiry Table (동적 로드) -->
         <div class="data-table-wrapper mb-8">
             <table class="data-table">
                 <thead>
                     <tr>
                         <th style="width: 100px;">Status</th>
-                        <th style="width: 120px;">Time</th>
+                        <th style="width: 140px;">Time</th>
                         <th>Total Population</th>
-                        <th>Target Context</th>
+                        <th>Source</th>
                         <th>Hospital Name</th>
                         <th style="width: 80px;">Action</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td><span class="badge badge-new">NEW</span></td>
-                        <td>10 mins ago</td>
-                        <td><span class="text-value-high">52,400</span></td>
-                        <td><div class="text-sub">강남구 / 30-40대 / 여성</div></td>
-                        <td>서울재활의학과의원</td>
-                        <td><a href="inquiry_detail.html" class="btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;">View</a></td>
-                    </tr>
-                    <tr>
-                        <td><span class="badge badge-new">NEW</span></td>
-                        <td>45 mins ago</td>
-                        <td><span class="text-value-high">18,200</span></td>
-                        <td><div class="text-sub">송파구 / 40-50대 / 남성</div></td>
-                        <td>(미입력)</td>
-                        <td><a href="inquiry_detail.html" class="btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;">View</a></td>
-                    </tr>
-                    <tr>
-                        <td><span class="badge badge-contacted">CONTACTED</span></td>
-                        <td>3 hours ago</td>
-                        <td>3,200</td>
-                        <td><div class="text-sub">마포구 / 20대 / 여성</div></td>
-                        <td>연세피부과</td>
-                        <td><a href="inquiry_detail.html" class="btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;">View</a></td>
-                    </tr>
+                <tbody id="recentInquiryTable">
+                    <tr><td colspan="6" style="text-align:center; padding:30px;">Loading...</td></tr>
                 </tbody>
             </table>
         </div>
 
         <h2 class="section-title" style="text-align: left; margin-bottom: 20px; font-size: 1.25rem;">Recent Orders</h2>
         
-        <!-- Recent Order Preview (Simple List) -->
+        <!-- Recent Order Preview (동적 로드) -->
         <div class="data-table-wrapper">
             <table class="data-table">
                 <thead>
@@ -102,24 +77,101 @@
                         <th>Status</th>
                         <th>Order ID</th>
                         <th>Amount</th>
-                        <th>Linked Query</th>
-                        <th>Executor</th>
+                        <th>Linked Inquiry</th>
+                        <th>Created</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td><span class="badge badge-qualified">CONFIRMED</span></td>
-                        <td>ORD-20240121-001</td>
-                        <td>3,000,000 원</td>
-                        <td>INQ-8829</td>
-                        <td>Manager Kim</td>
-                    </tr>
+                <tbody id="recentOrderTable">
+                    <tr><td colspan="5" style="text-align:center; padding:30px;">Loading...</td></tr>
                 </tbody>
             </table>
         </div>
 
     </main>
 
-    <script src="./assets/js/admin.js"></script>
+    <!-- Admin API Module -->
+    <script src="./assets/js/admin-api.js"></script>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        // 통계 로드
+        try {
+            const stats = await AdminAPI.stats.get();
+            
+            document.getElementById('kpiTotal').textContent = stats.inquiry.total || 0;
+            document.getElementById('kpiNew').textContent = stats.inquiry.new_count || 0;
+            document.getElementById('kpiQualified').textContent = stats.inquiry.qualified_count || 0;
+            document.getElementById('kpiTotalTrend').textContent = 
+                `${stats.inquiry.contacted_count || 0} contacted, ${stats.inquiry.converted_count || 0} converted`;
+        } catch (err) {
+            console.error('Stats load failed:', err);
+        }
+
+        // 최근 Inquiry 로드
+        try {
+            const data = await AdminAPI.inquiries.list({ limit: 5 });
+            renderRecentInquiries(data.inquiries);
+        } catch (err) {
+            document.getElementById('recentInquiryTable').innerHTML = 
+                `<tr><td colspan="6" style="text-align:center; color:#d32f2f;">Error: ${err.message}</td></tr>`;
+        }
+
+        // 최근 Order 로드
+        try {
+            const data = await AdminAPI.orders.list({ limit: 5 });
+            renderRecentOrders(data.orders);
+        } catch (err) {
+            document.getElementById('recentOrderTable').innerHTML = 
+                `<tr><td colspan="5" style="text-align:center; color:#d32f2f;">Error: ${err.message}</td></tr>`;
+        }
+
+        function renderRecentInquiries(inquiries) {
+            const tbody = document.getElementById('recentInquiryTable');
+            
+            if (!inquiries || inquiries.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">No inquiries yet</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = inquiries.map(inq => {
+                const total = inq.context_snapshot?.resData_snapshot?.total || '-';
+                const hospitalName = inq.context_snapshot?.hospital_name || '(미입력)';
+                const isHighValue = typeof total === 'number' && total >= 50000;
+
+                return `
+                <tr>
+                    <td>${AdminAPI.utils.statusBadge(inq.status)}</td>
+                    <td class="text-small">${AdminAPI.utils.formatDate(inq.created_at)}</td>
+                    <td><span class="${isHighValue ? 'text-value-high' : ''}">${AdminAPI.utils.formatNumber(total)}</span></td>
+                    <td class="text-small text-muted">${inq.source_type || '-'} / ${inq.source_page || '-'}</td>
+                    <td>${hospitalName}</td>
+                    <td><a href="inquiry_detail.html?id=${inq.inquiry_id}" class="btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;">View</a></td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        function renderRecentOrders(orders) {
+            const tbody = document.getElementById('recentOrderTable');
+            
+            if (!orders || orders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">No orders yet</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = orders.map(order => {
+                return `
+                <tr>
+                    <td>${AdminAPI.utils.statusBadge(order.status)}</td>
+                    <td style="font-weight:600;">${order.order_id}</td>
+                    <td>${order.amount ? AdminAPI.utils.formatNumber(order.amount) + ' 원' : '-'}</td>
+                    <td>${order.inquiry_id || '-'}</td>
+                    <td class="text-small">${AdminAPI.utils.formatDate(order.created_at).split(' ')[0]}</td>
+                </tr>
+                `;
+            }).join('');
+        }
+    });
+    </script>
 </body>
 </html>
