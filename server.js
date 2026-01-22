@@ -309,7 +309,13 @@ app.post('/api/inquiry', async (req, res) => {
     }
 });
 
-// 2. View Sales Lead (Admin Only)
+// =========================================================
+// 2. Inquiry 상세 조회 (Admin Only)
+// ⚠️ Phase 1 의도된 설계: Admin Key 기반 접근 제한
+// 이 엔드포인트는 복호화된 연락처 정보를 포함합니다.
+// X-Admin-Api-Key 없이 절대 노출하지 마세요.
+// → Phase 2에서 /api/admin/inquiry/:id 로 통일 예정
+// =========================================================
 app.post('/api/inquiry/:inquiryId/view', requireAdminKey, async (req, res) => {
     const { inquiryId } = req.params;
     
@@ -319,6 +325,7 @@ app.post('/api/inquiry/:inquiryId/view', requireAdminKey, async (req, res) => {
         const [rows] = await pool.execute(
             `SELECT inquiry_id, session_id, sim_uuid, context_snapshot, 
                     contact_phone, contact_email, interest_tags,
+                    source_type, source_page,
                     status, admin_reply, replied_at, created_at, updated_at
              FROM inquiry WHERE inquiry_id = ?`,
             [inquiryId]
@@ -353,10 +360,12 @@ app.post('/api/inquiry/:inquiryId/view', requireAdminKey, async (req, res) => {
     }
 });
 
-// 3. Update Inquiry Status (Admin only - requires API key)
-// Status flow: open → referenced → used_for_order → archived
-// 3. Update Sales Lead Status (Admin only - requires API key)
-// Status flow: new → contacted → qualified → converted
+// =========================================================
+// 3. Inquiry 상태 변경 (Admin Only)
+// ⚠️ Phase 1 의도된 설계: Admin Key 기반 접근 제한
+// Status flow: new → contacted → qualified → converted → archived
+// → Phase 2에서 /api/admin/inquiry/:id/status 로 통일 예정
+// =========================================================
 app.patch('/api/inquiry/:inquiryId/status', requireAdminKey, async (req, res) => {
     const { inquiryId } = req.params;
     const { status, note } = req.body;
@@ -686,7 +695,12 @@ app.get('/api/order/:orderId', async (req, res) => {
     }
 });
 
-// 3. Order 상태 업데이트 (Admin only)
+// =========================================================
+// 3. Order 상태 변경 (Admin Only)
+// ⚠️ Phase 1 의도된 설계: Admin Key 기반 접근 제한
+// Status flow: DRAFT → CONFIRMED → ORDERED → RUNNING → DONE
+// → Phase 2에서 /api/admin/order/:id/status 로 통일 예정
+// =========================================================
 app.patch('/api/order/:orderId/status', requireAdminKey, async (req, res) => {
     const { orderId } = req.params;
     const { status, runcomm_ref, note } = req.body;
@@ -748,42 +762,72 @@ app.get('/api/user/:userId/orders', async (req, res) => {
 // Admin API
 // =========================================================
 
+// =========================================================
 // 1. Inquiry 리스트 (Admin only)
+// ⚠️ Phase 1 의도된 설계: Admin Key 기반 접근 제한
+// → Phase 2에서 /api/admin/inquiry/* 경로로 통일 예정
+// =========================================================
 app.get('/api/admin/inquiries', requireAdminKey, async (req, res) => {
-    const { status, page = 1, limit = 20 } = req.query;
+    const { status, source_type, source_page, page = 1, limit = 20 } = req.query;
     const offset = (parseInt(page) - 1) * parseInt(limit);
 
     try {
+        // WHERE 조건 동적 빌드
+        let whereConditions = [];
+        let whereParams = [];
+
+        if (status) {
+            whereConditions.push('status = ?');
+            whereParams.push(status);
+        }
+        if (source_type) {
+            whereConditions.push('source_type = ?');
+            whereParams.push(source_type);
+        }
+        if (source_page) {
+            whereConditions.push('source_page = ?');
+            whereParams.push(source_page);
+        }
+
+        const whereClause = whereConditions.length > 0 
+            ? 'WHERE ' + whereConditions.join(' AND ')
+            : '';
+
         // 총 개수 조회
-        let countQuery = 'SELECT COUNT(*) as total FROM inquiry';
-        let countParams = [];
-        if (status) {
-            countQuery += ' WHERE status = ?';
-            countParams.push(status);
-        }
-        const [[{ total }]] = await pool.execute(countQuery, countParams);
+        const countQuery = `SELECT COUNT(*) as total FROM inquiry ${whereClause}`;
+        const [[{ total }]] = await pool.execute(countQuery, whereParams);
 
-        // 리스트 조회
-        let query = `SELECT inquiry_id, session_id, sim_uuid, 
-                            contact_phone, contact_email, status, 
-                            created_at, updated_at
-                     FROM inquiry`;
-        let params = [];
-        if (status) {
-            query += ' WHERE status = ?';
-            params.push(status);
-        }
-        query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
-        params.push(parseInt(limit), offset);
+        // 리스트 조회 (source_type, source_page, interest_tags, context_snapshot 포함)
+        const query = `SELECT inquiry_id, session_id, sim_uuid, 
+                              contact_phone, contact_email, status,
+                              source_type, source_page, interest_tags, context_snapshot,
+                              created_at, updated_at
+                       FROM inquiry ${whereClause}
+                       ORDER BY created_at DESC LIMIT ? OFFSET ?`;
+        
+        const queryParams = [...whereParams, parseInt(limit), offset];
+        const [rows] = await pool.execute(query, queryParams);
 
-        const [rows] = await pool.execute(query, params);
+        // contact 정보 복호화 및 JSON 파싱
+        const inquiries = rows.map(row => {
+            const inquiry = {
+                ...row,
+                contact_phone: row.contact_phone ? decrypt(row.contact_phone) : null,
+                contact_email: row.contact_email ? decrypt(row.contact_email) : null
+            };
 
-        // contact 정보 복호화
-        const inquiries = rows.map(row => ({
-            ...row,
-            contact_phone: row.contact_phone ? decrypt(row.contact_phone) : null,
-            contact_email: row.contact_email ? decrypt(row.contact_email) : null
-        }));
+            // interest_tags JSON 파싱
+            if (inquiry.interest_tags && typeof inquiry.interest_tags === 'string') {
+                try { inquiry.interest_tags = JSON.parse(inquiry.interest_tags); } catch (e) {}
+            }
+
+            // context_snapshot JSON 파싱
+            if (inquiry.context_snapshot && typeof inquiry.context_snapshot === 'string') {
+                try { inquiry.context_snapshot = JSON.parse(inquiry.context_snapshot); } catch (e) {}
+            }
+
+            return inquiry;
+        });
 
         res.status(200).send({
             inquiries,
@@ -800,7 +844,11 @@ app.get('/api/admin/inquiries', requireAdminKey, async (req, res) => {
     }
 });
 
+// =========================================================
 // 2. Order 리스트 (Admin only)
+// ⚠️ Phase 1 의도된 설계: Inquiry 기반 Order 생성 전략
+// → Order는 반드시 Inquiry를 통해 생성됨 (Admin-Generated Order)
+// =========================================================
 app.get('/api/admin/orders', requireAdminKey, async (req, res) => {
     const { status, page = 1, limit = 20 } = req.query;
     const offset = (parseInt(page) - 1) * parseInt(limit);
@@ -815,12 +863,17 @@ app.get('/api/admin/orders', requireAdminKey, async (req, res) => {
         }
         const [[{ total }]] = await pool.execute(countQuery, countParams);
 
-        // 리스트 조회
-        let query = `SELECT o.order_id, o.user_id, o.amount, o.status, 
-                            o.runcomm_ref, o.runcomm_sent_at, o.created_at,
-                            u.email as user_email, u.name as user_name
+        // 리스트 조회 (Inquiry 요약 정보 JOIN)
+        let query = `SELECT o.order_id, o.inquiry_id, o.user_id, o.amount, o.status, 
+                            o.runcomm_ref, o.runcomm_sent_at, o.memo, o.created_at,
+                            o.created_by_admin_id, o.decision_snapshot,
+                            u.email as user_email, u.name as user_name,
+                            i.source_type as inquiry_source_type,
+                            i.source_page as inquiry_source_page,
+                            i.context_snapshot as inquiry_context
                      FROM \`order\` o
-                     LEFT JOIN user u ON o.user_id = u.id`;
+                     LEFT JOIN user u ON o.user_id = u.id
+                     LEFT JOIN inquiry i ON o.inquiry_id = i.inquiry_id`;
         let params = [];
         if (status) {
             query += ' WHERE o.status = ?';
@@ -831,8 +884,42 @@ app.get('/api/admin/orders', requireAdminKey, async (req, res) => {
 
         const [rows] = await pool.execute(query, params);
 
+        // JSON 파싱 및 Inquiry 요약 추출
+        const orders = rows.map(row => {
+            const order = { ...row };
+            
+            // decision_snapshot JSON 파싱
+            if (order.decision_snapshot && typeof order.decision_snapshot === 'string') {
+                try { order.decision_snapshot = JSON.parse(order.decision_snapshot); } catch (e) {}
+            }
+
+            // inquiry_context에서 hospital_name 추출
+            let inquirySummary = null;
+            if (order.inquiry_context) {
+                try {
+                    const ctx = typeof order.inquiry_context === 'string' 
+                        ? JSON.parse(order.inquiry_context) 
+                        : order.inquiry_context;
+                    inquirySummary = {
+                        hospital_name: ctx.hospital_name || ctx.resData_snapshot?.hospital_name || null,
+                        total: ctx.resData_snapshot?.total || null,
+                        source_type: order.inquiry_source_type,
+                        source_page: order.inquiry_source_page
+                    };
+                } catch (e) {}
+            }
+            
+            // 원본 제거, 요약으로 대체
+            delete order.inquiry_context;
+            delete order.inquiry_source_type;
+            delete order.inquiry_source_page;
+            order.inquiry_summary = inquirySummary;
+
+            return order;
+        });
+
         res.status(200).send({
-            orders: rows,
+            orders,
             pagination: {
                 total,
                 page: parseInt(page),

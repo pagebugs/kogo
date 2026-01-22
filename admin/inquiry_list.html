@@ -23,31 +23,27 @@
     <main class="admin-container">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h2 class="section-title" style="text-align: left; margin: 0; font-size: 1.5rem;">Inquiry Management</h2>
-            <div class="text-small text-muted">Total 128 inquiries</div>
+            <div class="text-small text-muted" id="totalCount">Loading...</div>
         </div>
 
         <!-- Filter Bar -->
         <div class="filter-bar">
-            <select class="filter-select">
-                <option value="all">Check Status (All)</option>
+            <select class="filter-select" id="filterStatus">
+                <option value="">Status (All)</option>
                 <option value="new">NEW (Unread)</option>
                 <option value="contacted">CONTACTED</option>
                 <option value="qualified">QUALIFIED (High Potential)</option>
                 <option value="converted">CONVERTED (Ordered)</option>
             </select>
             
-            <select class="filter-select">
-                <option>Size (Total Pop.)</option>
-                <option>50,000 +</option>
-                <option>10,000 - 50,000</option>
-                <option>Under 10,000</option>
+            <select class="filter-select" id="filterSourceType">
+                <option value="">Source Type (All)</option>
+                <option value="analysis">Analysis</option>
+                <option value="simulation">Simulation</option>
+                <option value="direct">Direct</option>
             </select>
 
-            <select class="filter-select">
-                <option>Date Range (Last 7 Days)</option>
-            </select>
-
-            <button class="btn-primary" style="padding: 6px 16px; font-size: 0.9rem;">Filter</button>
+            <button class="btn-primary" style="padding: 6px 16px; font-size: 0.9rem;" id="applyFilterBtn">Filter</button>
         </div>
 
         <!-- Inquiry Table -->
@@ -58,104 +54,160 @@
                         <th style="width: 80px;">Status</th>
                         <th style="width: 140px;">Created At</th>
                         <th style="width: 120px;">Total Size</th>
-                        <th>Target Context</th>
+                        <th>Source</th>
                         <th>Hospital / Contact</th>
                         <th>Tags</th>
                         <th style="width: 80px;">Action</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <!-- High Value Item -->
-                    <tr style="background-color: #fff8f8;">
-                        <td><span class="badge badge-new">NEW</span></td>
-                        <td>
-                            <div>2026-01-21</div>
-                            <div class="text-small text-muted">14:30 (10m ago)</div>
-                        </td>
-                        <td>
-                            <span class="text-value-high" style="color: #d32f2f;">52,400</span>
-                            <span class="text-signal">High Demand</span>
-                        </td>
-                        <td>
-                            <div style="font-weight: 600;">강남구 / 30-40대 / 여성</div>
-                            <div class="text-small text-muted">Source: newresult.html</div>
-                        </td>
-                        <td>
-                            <div style="font-weight:600;">서울재활의학과의원</div>
-                            <div class="text-small text-muted">010-****-1234</div>
-                        </td>
-                        <td>
-                            <span class="text-small" style="background:#eee; padding:2px 4px; border-radius:2px;">#임플란트</span>
-                            <span class="text-small" style="background:#eee; padding:2px 4px; border-radius:2px;">#마케팅</span>
-                        </td>
-                        <td><a href="inquiry_detail.html" class="btn-secondary" style="padding: 4px 12px; font-size: 0.8rem;">View</a></td>
-                    </tr>
-
-                    <!-- Normal Item -->
-                    <tr>
-                        <td><span class="badge badge-new">NEW</span></td>
-                        <td>
-                            <div>2026-01-21</div>
-                            <div class="text-small text-muted">13:45</div>
-                        </td>
-                        <td><span class="text-value-high">18,200</span></td>
-                        <td>
-                            <div style="font-weight: 600;">송파구 / 40-50대 / 남성</div>
-                        </td>
-                        <td>
-                            <div style="color: #999;">(미입력)</div>
-                            <div class="text-small text-muted">010-****-9876</div>
-                        </td>
-                        <td>-</td>
-                        <td><a href="inquiry_detail.html" class="btn-secondary" style="padding: 4px 12px; font-size: 0.8rem;">View</a></td>
-                    </tr>
-
-                    <!-- Progressing Item -->
-                    <tr>
-                        <td><span class="badge badge-contacted">CONTACTED</span></td>
-                        <td>
-                            <div>2026-01-20</div>
-                            <div class="text-small text-muted">Yesterday</div>
-                        </td>
-                        <td>3,200</td>
-                        <td>
-                            <div style="font-weight: 600;">마포구 / 20대 / 여성</div>
-                        </td>
-                        <td>
-                            <div style="font-weight:600;">연세피부과</div>
-                            <div class="text-small text-muted">Checked</div>
-                        </td>
-                        <td><span class="text-small" style="background:#eee; padding:2px 4px; border-radius:2px;">#홍보</span></td>
-                        <td><a href="inquiry_detail.html" class="btn-secondary" style="padding: 4px 12px; font-size: 0.8rem;">View</a></td>
-                    </tr>
-
-                    <!-- Converted Item -->
-                    <tr style="opacity: 0.7;">
-                        <td><span class="badge badge-converted">CONVERTED</span></td>
-                        <td>
-                            <div>2026-01-19</div>
-                        </td>
-                        <td>12,500</td>
-                        <td>
-                            <div style="font-weight: 600;">서초구 / 30대 / 남성</div>
-                        </td>
-                        <td>
-                            <div style="font-weight:600;">바른치과</div>
-                        </td>
-                        <td>-</td>
-                        <td><a href="inquiry_detail.html" class="btn-secondary" style="padding: 4px 12px; font-size: 0.8rem;">Detail</a></td>
-                    </tr>
+                <tbody id="inquiryTableBody">
+                    <tr><td colspan="7" style="text-align:center; padding:40px;">Loading...</td></tr>
                 </tbody>
             </table>
         </div>
         
         <!-- Pagination -->
-        <div style="text-align: center; margin-top: 20px;">
-            <button class="btn-secondary" disabled>Prev</button>
-            <span style="margin: 0 10px; font-size: 0.9rem;">Page 1 of 5</span>
-            <button class="btn-secondary">Next</button>
+        <div style="text-align: center; margin-top: 20px;" id="paginationArea">
+            <button class="btn-secondary" id="prevBtn" disabled>Prev</button>
+            <span style="margin: 0 10px; font-size: 0.9rem;" id="pageInfo">Page 1 of 1</span>
+            <button class="btn-secondary" id="nextBtn">Next</button>
         </div>
 
     </main>
+
+    <!-- Admin API Module -->
+    <script src="./assets/js/admin-api.js"></script>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // 상태 관리
+        let currentPage = 1;
+        let totalPages = 1;
+        let currentFilters = {};
+
+        // URL 파라미터에서 필터 읽기
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('status')) {
+            document.getElementById('filterStatus').value = urlParams.get('status');
+            currentFilters.status = urlParams.get('status');
+        }
+
+        // 요소 참조
+        const tableBody = document.getElementById('inquiryTableBody');
+        const totalCountEl = document.getElementById('totalCount');
+        const pageInfoEl = document.getElementById('pageInfo');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        // Inquiry 리스트 로드
+        async function loadInquiries() {
+            tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:40px;">Loading...</td></tr>';
+
+            try {
+                const filters = {
+                    ...currentFilters,
+                    page: currentPage,
+                    limit: 20
+                };
+
+                const data = await AdminAPI.inquiries.list(filters);
+                
+                totalCountEl.textContent = `Total ${data.pagination.total} inquiries`;
+                totalPages = data.pagination.totalPages;
+                pageInfoEl.textContent = `Page ${data.pagination.page} of ${totalPages}`;
+
+                prevBtn.disabled = currentPage <= 1;
+                nextBtn.disabled = currentPage >= totalPages;
+
+                renderTable(data.inquiries);
+            } catch (err) {
+                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:40px; color:#d32f2f;">Error: ${err.message}</td></tr>`;
+            }
+        }
+
+        // 테이블 렌더링
+        function renderTable(inquiries) {
+            if (!inquiries || inquiries.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:40px; color:#999;">No inquiries found</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = inquiries.map(inq => {
+                // context_snapshot에서 total 추출
+                const total = inq.context_snapshot?.resData_snapshot?.total || '-';
+                const hospitalName = inq.context_snapshot?.hospital_name || '(미입력)';
+                
+                // 태그 렌더링
+                const tags = (inq.interest_tags || []).map(tag => 
+                    `<span class="text-small" style="background:#eee; padding:2px 4px; border-radius:2px; margin-right:4px;">#${tag}</span>`
+                ).join('') || '-';
+
+                // 연락처 마스킹
+                const phone = inq.contact_phone 
+                    ? inq.contact_phone.replace(/(\d{3})(\d{4})(\d{4})/, '$1-****-$3')
+                    : '-';
+
+                // 고가치 리드 강조
+                const isHighValue = typeof total === 'number' && total >= 50000;
+                const rowStyle = isHighValue ? 'background-color: #fff8f8;' : '';
+                const totalClass = isHighValue ? 'text-value-high' : '';
+
+                return `
+                <tr style="${rowStyle}">
+                    <td>${AdminAPI.utils.statusBadge(inq.status)}</td>
+                    <td>
+                        <div>${AdminAPI.utils.formatDate(inq.created_at).split(' ')[0]}</div>
+                        <div class="text-small text-muted">${AdminAPI.utils.formatDate(inq.created_at).split(' ')[1]}</div>
+                    </td>
+                    <td>
+                        <span class="${totalClass}">${AdminAPI.utils.formatNumber(total)}</span>
+                        ${isHighValue ? '<span class="text-signal">High Demand</span>' : ''}
+                    </td>
+                    <td>
+                        <div class="text-small text-muted">${inq.source_type || '-'} / ${inq.source_page || '-'}</div>
+                    </td>
+                    <td>
+                        <div style="font-weight:600;">${hospitalName}</div>
+                        <div class="text-small text-muted">${phone}</div>
+                    </td>
+                    <td>${tags}</td>
+                    <td><a href="inquiry_detail.html?id=${inq.inquiry_id}" class="btn-secondary" style="padding: 4px 12px; font-size: 0.8rem;">View</a></td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        // 필터 적용
+        document.getElementById('applyFilterBtn').addEventListener('click', () => {
+            currentFilters = {};
+            const status = document.getElementById('filterStatus').value;
+            const sourceType = document.getElementById('filterSourceType').value;
+
+            if (status) currentFilters.status = status;
+            if (sourceType) currentFilters.source_type = sourceType;
+
+            currentPage = 1;
+            loadInquiries();
+        });
+
+        // 페이지네이션
+        prevBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                loadInquiries();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                loadInquiries();
+            }
+        });
+
+        // 초기 로드
+        loadInquiries();
+    });
+    </script>
 </body>
 </html>

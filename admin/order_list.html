@@ -23,19 +23,21 @@
     <main class="admin-container">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h2 class="section-title" style="text-align: left; margin: 0; font-size: 1.5rem;">Order Management</h2>
-            <button class="btn-primary" style="font-size: 0.9rem;">+ Manual Order</button>
+            <div class="text-small text-muted" id="totalCount">Loading...</div>
         </div>
 
         <!-- Filter Bar -->
         <div class="filter-bar">
-            <select class="filter-select">
-                <option value="all">Status (All)</option>
-                <option value="draft">DRAFT (작성중)</option>
-                <option value="confirmed">CONFIRMED (확정)</option>
-                <option value="running">RUNNING (집행중)</option>
-                <option value="done">DONE (완료)</option>
+            <select class="filter-select" id="filterStatus">
+                <option value="">Status (All)</option>
+                <option value="DRAFT">DRAFT (작성중)</option>
+                <option value="CONFIRMED">CONFIRMED (확정)</option>
+                <option value="ORDERED">ORDERED (발주)</option>
+                <option value="RUNNING">RUNNING (집행중)</option>
+                <option value="DONE">DONE (완료)</option>
+                <option value="CANCELLED">CANCELLED (취소)</option>
             </select>
-            <input type="text" placeholder="Search Order ID..." class="filter-select" style="min-width: 200px;">
+            <button class="btn-primary" style="padding: 6px 16px; font-size: 0.9rem;" id="applyFilterBtn">Filter</button>
         </div>
 
         <!-- Order Table -->
@@ -52,37 +54,156 @@
                         <th style="width: 80px;">Action</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td><span class="badge badge-converted">CONFIRMED</span></td>
-                        <td style="font-weight: 600;">ORD-20240121-001</td>
-                        <td><a href="inquiry_detail.html" style="text-decoration: underline; color: #666;">INQ-8829</a></td>
-                        <td style="text-align: right; font-weight: 700;">3,000,000</td>
-                        <td>2024-01-21</td>
-                        <td>계약금 입금 완료</td>
-                        <td><button class="btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;">Edit</button></td>
-                    </tr>
-                    <tr>
-                        <td><span class="badge badge-qualified">DRAFT</span></td>
-                        <td style="font-weight: 600;">ORD-20240120-005</td>
-                        <td><a href="inquiry_detail.html" style="text-decoration: underline; color: #666;">INQ-8812</a></td>
-                        <td style="text-align: right; font-weight: 700;">-</td>
-                        <td>2024-01-20</td>
-                        <td>견적 조율 중</td>
-                        <td><button class="btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;">Edit</button></td>
-                    </tr>
-                    <tr style="background-color: #f9f9f9; color: #999;">
-                        <td><span class="badge" style="background: #eee; color: #666;">DONE</span></td>
-                        <td style="font-weight: 600;">ORD-20231215-002</td>
-                        <td><a href="#" style="text-decoration: underline; color: #999;">INQ-7740</a></td>
-                        <td style="text-align: right; font-weight: 700;">5,500,000</td>
-                        <td>2023-12-15</td>
-                        <td>12월 집행 완료건</td>
-                        <td><button class="btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;">View</button></td>
-                    </tr>
+                <tbody id="orderTableBody">
+                    <tr><td colspan="7" style="text-align:center; padding:40px;">Loading...</td></tr>
                 </tbody>
             </table>
         </div>
+        
+        <!-- Pagination -->
+        <div style="text-align: center; margin-top: 20px;" id="paginationArea">
+            <button class="btn-secondary" id="prevBtn" disabled>Prev</button>
+            <span style="margin: 0 10px; font-size: 0.9rem;" id="pageInfo">Page 1 of 1</span>
+            <button class="btn-secondary" id="nextBtn">Next</button>
+        </div>
     </main>
+
+    <!-- Admin API Module -->
+    <script src="./assets/js/admin-api.js"></script>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // 상태 관리
+        let currentPage = 1;
+        let totalPages = 1;
+        let currentFilters = {};
+
+        // 요소 참조
+        const tableBody = document.getElementById('orderTableBody');
+        const totalCountEl = document.getElementById('totalCount');
+        const pageInfoEl = document.getElementById('pageInfo');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        // Order 리스트 로드
+        async function loadOrders() {
+            tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:40px;">Loading...</td></tr>';
+
+            try {
+                const filters = {
+                    ...currentFilters,
+                    page: currentPage,
+                    limit: 20
+                };
+
+                const data = await AdminAPI.orders.list(filters);
+                
+                totalCountEl.textContent = `Total ${data.pagination.total} orders`;
+                totalPages = data.pagination.totalPages;
+                pageInfoEl.textContent = `Page ${data.pagination.page} of ${totalPages || 1}`;
+
+                prevBtn.disabled = currentPage <= 1;
+                nextBtn.disabled = currentPage >= totalPages;
+
+                renderTable(data.orders);
+            } catch (err) {
+                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:40px; color:#d32f2f;">Error: ${err.message}</td></tr>`;
+            }
+        }
+
+        // 테이블 렌더링
+        function renderTable(orders) {
+            if (!orders || orders.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:40px; color:#999;">No orders found</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = orders.map(order => {
+                // Inquiry 요약
+                const inquirySummary = order.inquiry_summary;
+                const hospitalName = inquirySummary?.hospital_name || '-';
+                const inquiryLink = order.inquiry_id 
+                    ? `<a href="inquiry_detail.html?id=${order.inquiry_id}" style="text-decoration: underline; color: #666;">${order.inquiry_id}</a><br><span class="text-small text-muted">${hospitalName}</span>`
+                    : '-';
+
+                // 완료된 항목 스타일
+                const isDone = order.status === 'DONE' || order.status === 'CANCELLED';
+                const rowStyle = isDone ? 'background-color: #f9f9f9; color: #999;' : '';
+
+                return `
+                <tr style="${rowStyle}">
+                    <td>${AdminAPI.utils.statusBadge(order.status)}</td>
+                    <td style="font-weight: 600;">${order.order_id}</td>
+                    <td>${inquiryLink}</td>
+                    <td style="text-align: right; font-weight: 700;">${order.amount ? AdminAPI.utils.formatNumber(order.amount) : '-'}</td>
+                    <td>${AdminAPI.utils.formatDate(order.created_at).split(' ')[0]}</td>
+                    <td>${order.memo || '-'}</td>
+                    <td>
+                        <button class="btn-secondary status-btn" data-order-id="${order.order_id}" data-current-status="${order.status}" style="padding: 4px 8px; font-size: 0.8rem;">Update</button>
+                    </td>
+                </tr>
+                `;
+            }).join('');
+
+            // 상태 변경 버튼 이벤트
+            document.querySelectorAll('.status-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const orderId = btn.dataset.orderId;
+                    const currentStatus = btn.dataset.currentStatus;
+                    
+                    const nextStatuses = {
+                        'DRAFT': 'CONFIRMED',
+                        'CONFIRMED': 'ORDERED',
+                        'ORDERED': 'RUNNING',
+                        'RUNNING': 'DONE'
+                    };
+
+                    const nextStatus = nextStatuses[currentStatus];
+                    if (!nextStatus) {
+                        alert('이미 최종 상태입니다.');
+                        return;
+                    }
+
+                    if (!confirm(`상태를 ${currentStatus} → ${nextStatus}로 변경하시겠습니까?`)) return;
+
+                    try {
+                        await AdminAPI.orders.updateStatus(orderId, nextStatus);
+                        alert('상태가 변경되었습니다.');
+                        loadOrders();
+                    } catch (err) {
+                        alert('상태 변경 실패: ' + err.message);
+                    }
+                });
+            });
+        }
+
+        // 필터 적용
+        document.getElementById('applyFilterBtn').addEventListener('click', () => {
+            currentFilters = {};
+            const status = document.getElementById('filterStatus').value;
+            if (status) currentFilters.status = status;
+            currentPage = 1;
+            loadOrders();
+        });
+
+        // 페이지네이션
+        prevBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                loadOrders();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                loadOrders();
+            }
+        });
+
+        // 초기 로드
+        loadOrders();
+    });
+    </script>
 </body>
 </html>
