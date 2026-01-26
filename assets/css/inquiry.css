@@ -28,7 +28,7 @@
 
 .inquiry-modal-content {
   position: relative;
-  background: #fff;
+  background: var(--color-white);
   border-radius: 16px;
   padding: 32px;
   width: 90%;
@@ -48,7 +48,7 @@
 .inquiry-modal-header h2 {
   font-size: 20px;
   font-weight: 700;
-  color: #111;
+  color: oklch(20% 0 0);
   margin: 0;
   line-height: 1.4;
 }
@@ -57,14 +57,14 @@
   background: none;
   border: none;
   font-size: 28px;
-  color: #999;
+  color: var(--color-light-gray);
   cursor: pointer;
   padding: 0;
   line-height: 1;
 }
 
 .inquiry-modal-close:hover {
-  color: #333;
+  color: var(--color-dark-gray);
 }
 
 /* Context Badge */
@@ -94,7 +94,7 @@
   display: block;
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: var(--color-dark-gray);
   margin-bottom: 8px;
 }
 
@@ -113,7 +113,7 @@
 .inquiry-form-group textarea:focus,
 .inquiry-form-group input:focus {
   outline: none;
-  border-color: #111;
+  border-color: oklch(20% 0 0);
 }
 
 .inquiry-form-group textarea {
@@ -136,7 +136,7 @@
   align-items: center;
   gap: 10px;
   font-size: 14px;
-  color: #333;
+  color: var(--color-dark-gray);
   cursor: pointer;
   user-select: none;
 }
@@ -144,14 +144,14 @@
 .inquiry-checkbox input {
   width: 18px;
   height: 18px;
-  accent-color: #111;
+  accent-color: oklch(20% 0 0);
   cursor: pointer;
   margin: 0;
 }
 
 .inquiry-notice {
   font-size: 13px;
-  color: #666;
+  color: var(--color-medium-gray);
   margin-top: 24px;
   line-height: 1.5;
   text-align: center;
@@ -178,7 +178,7 @@
 }
 
 .inquiry-btn-primary {
-  background: #111;
+  background: oklch(20% 0 0);
   color: #fff;
 }
 
@@ -192,8 +192,8 @@
 }
 
 .inquiry-btn-secondary {
-  background: #f5f5f5;
-  color: #666;
+  background: var(--color-bg-gray);
+  color: var(--color-medium-gray);
 }
 
 .inquiry-btn-secondary:hover {
@@ -208,7 +208,7 @@
 .inquiry-success-icon {
   width: 60px;
   height: 60px;
-  background: #111;
+  background: oklch(20% 0 0);
   color: #fff;
   border-radius: 50%;
   display: flex;
@@ -225,7 +225,7 @@
 
 .inquiry-success-desc {
   font-size: 14px;
-  color: #666;
+  color: var(--color-medium-gray);
   line-height: 1.6;
   margin-bottom: 24px;
 }
@@ -240,7 +240,7 @@
 
 .order-cta-message {
   font-size: 14px;
-  color: #333;
+  color: var(--color-dark-gray);
   line-height: 1.6;
   margin-bottom: 16px;
 }

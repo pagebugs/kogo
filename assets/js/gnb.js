@@ -91,5 +91,56 @@ window.initGNB = function() {
     };
   });
   
-  console.log("GNB Initialized");
+  // 4. Smart Sticky Header Logic
+  // - Scroll Down: Hide
+  // - Scroll Up: Show
+  // - Scroll Stop (Delay): Show (New Request)
+  
+  let lastScrollY = window.scrollY;
+  let scrollTimeout; // For detecting scroll stop
+  const header = document.querySelector('.header');
+  
+  if (header) {
+    window.addEventListener('scroll', () => {
+      const currentScrollY = window.scrollY;
+      
+      // Ignore bounce-back at top/bottom
+      if (currentScrollY < 0) return;
+      
+      // 1. Directional Logic
+      if (currentScrollY > lastScrollY && currentScrollY > 60) {
+        // Scrolling Down -> Hide
+        header.classList.add('nav-hidden');
+        header.classList.remove('nav-visible');
+        
+        // Close Mega Panels
+        const openPanel = document.querySelector('.mega-dropdown.open');
+        if (openPanel) {
+            panels.forEach(p => p.classList.remove('open'));
+            dropdownButtons.forEach(b => b.classList.remove('open'));
+            body.classList.remove('has-mega-open');
+        }
+        
+      } else {
+        // Scrolling Up -> Show
+        header.classList.remove('nav-hidden');
+        header.classList.add('nav-visible');
+      }
+      
+      lastScrollY = currentScrollY;
+      
+      // 2. Scroll Stop Logic (Show Header after delay)
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        // User stopped scrolling -> Show Header
+        if (window.scrollY > 60) { // Only if not at very top (avoid conflict)
+            header.classList.remove('nav-hidden');
+            header.classList.add('nav-visible');
+        }
+      }, 600); // 600ms delay
+      
+    }, { passive: true });
+  }
+
+  console.log("GNB Initialized (Smart Sticky + Auto-Show)");
 };

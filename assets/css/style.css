@@ -11,14 +11,14 @@
   --font-family-base: "SUIT", -apple-system, BlinkMacSystemFont, sans-serif;
   --font-family-heading: "SUIT", sans-serif;
 
-  /* BW Grayscale Colors */
-  --color-black: #000000;
-  --color-dark-gray: #333333;
-  --color-medium-gray: #666666;
-  --color-light-gray: #999999;
-  --color-border-gray: #e0e0e0;
-  --color-bg-gray: #f5f5f5;
-  --color-white: #ffffff;
+  /* BW Grayscale Colors (OKLCH System) */
+  --color-black: oklch(0% 0 0);
+  --color-dark-gray: oklch(35% 0 0);
+  --color-medium-gray: oklch(55% 0 0);
+  --color-light-gray: oklch(75% 0 0);
+  --color-border-gray: oklch(92% 0 0);
+  --color-bg-gray: oklch(97% 0 0);
+  --color-white: oklch(100% 0 0);
 
   /* Spacing */
   --space-1: 0.25rem;
@@ -48,6 +48,16 @@
   --font-2xl: 3rem;       /* 48px */
   --font-3xl: 4rem;       /* 64px */
 
+  /* Line Height */
+  --lh-tight: 1.2;
+  --lh-heading: 1.3;
+  --lh-base: 1.6;
+
+  /* Letter Spacing */
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide: 1px;
+
   /* Transitions */
   --transition: 0.28s ease;
 }
@@ -71,7 +81,37 @@ body {
   font-family: var(--font-family-base);
   color: var(--color-black);
   background: var(--color-white);
-  line-height: 1.6;
+  line-height: var(--lh-base);
+  
+  /* WINDOW SCROLL IS DISABLED FOR SNAP CONTAINER */
+  overflow: hidden; /* Prevent double scrollbar */
+}
+
+/* 반전 상태 (Theme Invert / Dark Mode) */
+body.theme-invert {
+  /* Redefine global tokens for dark mode */
+  --color-black: oklch(100% 0 0);       /* Was Black -> Now White */
+  --color-white: oklch(0% 0 0);         /* Was White -> Now Black */
+  
+  --color-dark-gray: oklch(80% 0 0);    /* Lighten for dark mode text */
+  --color-medium-gray: oklch(65% 0 0);  /* Adjust mid-tones */
+  
+  --color-bg-gray: oklch(15% 0 0);      /* Was Light Gray BG -> Now Dark Gray BG */
+  --color-border-gray: oklch(25% 0 0);  /* Darker border */
+}
+
+/* Scroll Container (Main Scroll Context) */
+.scroll-container {
+  height: 100vh;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+
+/* Scroll Snap Alignment for Sections */
+section, .section, .hero, .partners, .benefit, .simulator {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
 }
 
 img {
@@ -127,7 +167,7 @@ h1, h2, h3, h4, h5, h6 {
   margin: 0;
   font-weight: 600;
   font-family: var(--font-family-heading);
-  line-height: 1.3;
+  line-height: var(--lh-heading);
 }
 
 h1 { font-size: var(--font-3xl); }
@@ -211,11 +251,9 @@ p:last-child {
 /* =========================================================
    HERO SECTION
  ========================================================= */
-/* =========================================================
-   HERO SECTION
- ========================================================= */
 .hero {
-  min-height: 80vh;
+  /*margin-top: var(--nav-height);*/
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -231,11 +269,10 @@ p:last-child {
 }
 
 .hero-headline {
-  font-size: var(--font-3xl);
-  font-weight: 800; /* Extra Bold */
+  font-size: var(--font-2xl);
   margin-bottom: var(--space-6);
-  line-height: 1.3;
-  letter-spacing: -0.02em; /* SUIT 폰트 자간 최적화 */
+  line-height: var(--lh-heading);
+  letter-spacing: var(--tracking-tight); /* SUIT 폰트 자간 최적화 */
   word-break: keep-all; /* 한글 줄바꿈 최적화 */
 }
 
@@ -243,7 +280,7 @@ p:last-child {
   font-size: var(--font-lg);
   color: var(--color-dark-gray); /* 가독성 위해 medium-gray보다 진하게 */
   margin-bottom: var(--space-10);
-  line-height: 1.6;
+  line-height: var(--lh-base);
   letter-spacing: -0.01em;
   word-break: keep-all;
 }
@@ -258,10 +295,31 @@ p:last-child {
    PARTNER LOGO SECTION
  ========================================================= */
 .partners {
+  min-height: 100vh;
+  padding: 0; /* Remove padding to handle internally or keep it? User wants full screen feel */
+  /* padding: var(--space-10) 0; -> keeping padding but letting flex handle distribution is safer, but user said "bottom에 붙도록". */
+  /* Let's keep the padding but rely on flex-grow for the middle part. */
   padding: var(--space-10) 0;
   border-top: 1px solid var(--color-border-gray);
   border-bottom: 1px solid var(--color-border-gray);
   background: var(--color-white);
+  
+  /* Layout: Column Flex */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Value Cards Container: Fill space and center content */
+.partners > .container:first-of-type {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Partners Logo Container: Stick to bottom (naturally pushed by flex:1 above) */
+.partners > .container:last-of-type {
+  flex: 0 0 auto;
 }
 
 .partners-title {
@@ -270,7 +328,7 @@ p:last-child {
   color: var(--color-light-gray);
   margin-bottom: var(--space-6);
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: var(--tracking-wide);
 }
 
 .partner-logos {
@@ -297,6 +355,7 @@ p:last-child {
  ========================================================= */
 .value-props {
   padding: var(--space-16) 0;
+  scroll-snap-align: start;
 }
 
 .value-card {
@@ -328,7 +387,7 @@ p:last-child {
 .value-card-desc {
   font-size: var(--font-base);
   color: var(--color-medium-gray);
-  line-height: 1.6;
+  line-height: var(--lh-base);
 }
 
 /* =========================================================
@@ -359,7 +418,7 @@ p:last-child {
   font-weight: 800;
   color: var(--color-black);
   margin: var(--space-4) 0 var(--space-1);
-  line-height: 1.2;
+  line-height: var(--lh-tight);
 }
 
 .value-card-fact-label {
@@ -384,6 +443,12 @@ p:last-child {
    SUBSCRIPTION BENEFIT
  ========================================================= */
 .benefit {
+  /* Full Screen Layout */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
   padding: var(--space-16) 0;
   background: var(--color-bg-gray);
 }
@@ -402,7 +467,7 @@ p:last-child {
   border-radius: 20px;
   margin-bottom: var(--space-6);
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: var(--tracking-wide);
 }
 
 .benefit-title {
@@ -430,6 +495,7 @@ p:last-child {
   padding: var(--space-6);
   background: var(--color-white);
   border-radius: var(--border-radius);
+  line-height: var(--lh-base);
 }
 
 .benefit-feature-title {
@@ -448,9 +514,25 @@ p:last-child {
    SIMULATOR LINK
  ========================================================= */
 .simulator {
-  padding: var(--space-16) 0;
+  /* Full Screen Layout */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  /* justify-content: center; removed to allow footer to be pushed by flex-grow */
+  
+  padding: 0; /* Remove top/bottom padding to let footer sit flush (or keep if desired) */
+  /* Actually for visual balance with other sections, we might want top padding. */
+  padding-top: var(--space-16);
+  
   text-align: center;
   background: var(--color-white);
+}
+
+.simulator > .container {
+  flex: 1; /* Grow to fill space, pushing footer down */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .simulator-card {
@@ -490,9 +572,77 @@ p:last-child {
    FOOTER
  ========================================================= */
 .footer {
+  /* Snap behavior removed as it is now inside section */
+  /* scroll-snap-align: end; */
+  
+  flex: 0 0 auto; /* Don't shrink/grow */
+
   padding: var(--space-8) 0;
   border-top: 1px solid var(--color-border-gray);
   background: var(--color-bg-gray);
+}
+
+/* =========================================================
+   PAGE NAVIGATION DOTS
+ ========================================================= */
+#page-nav {
+  position: fixed;
+  right: var(--space-6);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
+}
+
+#page-nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+#page-nav li a {
+  display: block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-border-gray);
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+#page-nav li a.active {
+  background: var(--color-black);
+  transform: scale(1.2);
+}
+
+#page-nav li a:hover {
+  background: var(--color-medium-gray);
+}
+
+/* Tooltip Label */
+#page-nav li a::before {
+  content: attr(data-label);
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 4px 8px;
+  background: var(--color-black);
+  color: var(--color-white);
+  font-size: 12px;
+  border-radius: 4px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease;
+  white-space: nowrap;
+}
+
+#page-nav li a:hover::before {
+  opacity: 1;
+  visibility: visible;
 }
 
 .footer-content {
@@ -540,6 +690,29 @@ p:last-child {
     --container-padding: var(--space-4);
     --grid-gap: var(--space-4);
   }
+  
+  /* Mobile: Disable Scroll Snap & Restore Window Scroll */
+  body {
+    overflow: auto; /* Restore scrollbar */
+  }
+  
+  .scroll-container {
+    height: auto;
+    overflow-y: visible;
+    scroll-snap-type: none;
+  }
+  
+  section, .section, .hero, .partners, .benefit, .simulator, .footer {
+    scroll-snap-align: none;
+    /* min-height: auto; -> User requested keeping section nav, so maybe keep min-height for distinct sections? 
+       But "no scroll snap action" means free scrolling. 
+       Let's keep min-height: 100vh? No, that's annoying on mobile if content is short/long. 
+       Let's set min-height: auto or a reasonable minimum. 
+       Actually user didn't ask to remove full height, just snap. 
+       But usually full height on mobile is bad UX if content overflows. 
+       Let's set min-height: auto for safety. */
+    min-height: auto;
+  }
 
   /* Mobile grid - single column */
   .col-1, .col-2, .col-3, .col-4, .col-5, .col-6,
@@ -556,6 +729,8 @@ p:last-child {
   .hero {
     min-height: auto;
     padding: var(--space-10) 0;
+    /* Prevent Header Overlap */
+    padding-top: 120px; /* nav height + spacing */
   }
 
   .hero-headline {
@@ -736,7 +911,7 @@ p:last-child {
   font-size: var(--font-base);
   color: var(--color-medium-gray);
   margin-bottom: var(--space-6);
-  line-height: 1.6;
+  line-height: var(--lh-base);
 }
 
 .modal-close {

@@ -240,6 +240,7 @@
 
 .radius-range {
   -webkit-appearance: none;
+  appearance: none;
   width: 100%;
   height: 4px;
   background: var(--color-border-gray);

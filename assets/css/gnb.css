@@ -4,14 +4,15 @@
 
 :root {
   /* COLORS */
-  --color-primary: #3617CE;
-  --color-primary-50: rgba(54, 23, 206, 0.06);
-  --color-bg: #ffffff;
-  --color-bg-muted: #f7f7f7;
-  --color-text: #111;
-  --color-text-muted: rgba(0,0,0,0.7);
-  --color-border: rgba(0,0,0,0.08);
-  --color-hover-bg: rgba(0,0,0,0.06);
+  /* COLORS (OKLCH System) */
+  --color-primary: oklch(45% 0.26 264);
+  --color-primary-50: oklch(45% 0.26 264 / 0.06);
+  --color-bg: oklch(100% 0 0);
+  --color-bg-muted: oklch(97% 0 0);
+  --color-text: oklch(20% 0 0);
+  --color-text-muted: oklch(0% 0 0 / 0.7);
+  --color-border: oklch(0% 0 0 / 0.08);
+  --color-hover-bg: oklch(0% 0 0 / 0.06);
 
   /* SPACING */
   --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem;
@@ -42,13 +43,24 @@
    HEADER
 ========================================================= */
 .header {
-  position: sticky;
+  position: fixed; /* Changed from sticky to fixed for smart behavior */
   top: 0;
+  width: 100%;
   z-index: var(--z-header);
   height: var(--nav-height);
   background: rgba(255,255,255,0.85);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--color-border);
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth slide */
+}
+
+/* Smart Sticky States */
+.header.nav-hidden {
+  transform: translateY(-100%);
+}
+
+.header.nav-visible {
+  transform: translateY(0);
 }
 
 .header-inner { height: 100%; }
