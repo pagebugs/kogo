@@ -1,0 +1,27 @@
+﻿,To-be,,
+,A,B,C
+1,"TouchAd Value
+Built for local patient intent",<여백>,"카드 결제와 이동 동선이
+환자의 ‘지금’을 말해줍니다"
+2,<img>,<여백>,<img>
+3,"진료권 안에서
+이미 움직인 사람들
+결제와 이동 데이터로 검증된
+가망 환자입니다",<여백>,고관여 타겟
+4,화살표,<여백>,
+,,,
+,as-is (code lable),,
+,a1,,
+,b1,b2,c2
+,,b3,
+,,b4,
+,as-is (html contents),,
+,"TouchAd Value
+Built for local patient intent",,
+,"카드 결제와 이동 동선이
+환자의 ‘지금’을 말해줍니다","진료권 안에서
+이미 움직인 사람들","Next
+고관여 타겟"
+,,"결제와 이동 데이터로 검증된
+가망 환자입니다",
+,,화살표,

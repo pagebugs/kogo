@@ -4,7 +4,7 @@
 
 ```bash
 # PHP 내장 서버 실행 (프로젝트 루트에서)
-php -S localhost:8080
+php -S localhost:8000
 
 # 특정 폴더를 document root로 지정
 php -S localhost:8080 -t ./touch
