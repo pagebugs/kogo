@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kogo 관리자 - 터치애드 문의 관리</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT/fonts/variable/woff2/SUIT-Variable.css" rel="stylesheet">
+</head>
+<body class="admin-body">
+
+    <!-- 1depth: Global Navigation Bar -->
+    <nav class="global-nav">
+        <div class="global-nav-logo">Kogo</div>
+        <div class="global-nav-menu">
+            <a href="../index.html">대시보드</a>
+            <div class="dropdown">
+                <a href="#" class="active">서비스 관리 ▾</a>
+                <div class="dropdown-content">
+                    <a href="index.html" class="active">터치애드</a>
+                    <a href="#" style="color:#666;">코고케어 (예정)</a>
+                </div>
+            </div>
+            <a href="#" style="color:#666;">회원 관리</a>
+            <a href="#" style="color:#666;">빌링</a>
+            <a href="#" style="color:#666;">설정</a>
+        </div>
+        <div class="global-nav-user">관리자님</div>
+    </nav>
+
+    <!-- 3depth: TouchAd Sub Navigation -->
+    <div class="service-nav">
+        <span class="service-nav-title">터치애드</span>
+        <div class="service-nav-menu">
+            <a href="index.html">대시보드</a>
+            <a href="inquiry_list.html" class="active">문의 관리</a>
+            <a href="order_list.html">주문 관리</a>
+            <a href="#" style="color:#999;">리포트</a>
+            <a href="#" style="color:#999;">설정</a>
+        </div>
+    </div>
+
+    <main class="admin-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 class="section-title" style="text-align: left; margin: 0; font-size: 1.5rem;">문의 관리</h2>
+            <div class="text-small text-muted" id="totalCount">로딩 중...</div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <select class="filter-select" id="filterStatus">
+                <option value="">상태 (전체)</option>
+                <option value="new">NEW (신규)</option>
+                <option value="contacted">CONTACTED (컨택 완료)</option>
+                <option value="qualified">QUALIFIED (영업 준비)</option>
+                <option value="converted">CONVERTED (전환 완료)</option>
+            </select>
+            
+            <select class="filter-select" id="filterSourceType">
+                <option value="">유입 경로 (전체)</option>
+                <option value="analysis">분석</option>
+                <option value="simulation">시뮬레이션</option>
+                <option value="direct">직접</option>
+            </select>
+
+            <button class="btn-primary" style="padding: 6px 16px; font-size: 0.9rem;" id="applyFilterBtn">필터 적용</button>
+        </div>
+
+        <!-- Inquiry Table -->
+        <div class="data-table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">상태</th>
+                        <th style="width: 140px;">생성일</th>
+                        <th style="width: 120px;">잠재 고객 수</th>
+                        <th>유입 경로</th>
+                        <th>병원명 / 연락처</th>
+                        <th>태그</th>
+                        <th style="width: 80px;">액션</th>
+                    </tr>
+                </thead>
+                <tbody id="inquiryTableBody">
+                    <tr><td colspan="7" style="text-align:center; padding:40px;">로딩 중...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        <div style="text-align: center; margin-top: 20px;" id="paginationArea">
+            <button class="btn-secondary" id="prevBtn" disabled>이전</button>
+            <span style="margin: 0 10px; font-size: 0.9rem;" id="pageInfo">페이지 1 / 1</span>
+            <button class="btn-secondary" id="nextBtn">다음</button>
+        </div>
+
+    </main>
+
+    <!-- Admin JS Modules -->
+    <script src="../assets/js/admin-api.js"></script>
+    <script src="../assets/js/admin.js"></script>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        let currentPage = 1;
+        let totalPages = 1;
+        let currentFilters = {};
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('status')) {
+            document.getElementById('filterStatus').value = urlParams.get('status');
+            currentFilters.status = urlParams.get('status');
+        }
+
+        const tableBody = document.getElementById('inquiryTableBody');
+        const totalCountEl = document.getElementById('totalCount');
+        const pageInfoEl = document.getElementById('pageInfo');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        async function loadInquiries() {
+            tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:40px;">로딩 중...</td></tr>';
+
+            try {
+                const filters = { ...currentFilters, page: currentPage, limit: 20 };
+                const data = await AdminAPI.inquiries.list(filters);
+                
+                totalCountEl.textContent = `총 ${data.pagination.total}건`;
+                totalPages = data.pagination.totalPages;
+                pageInfoEl.textContent = `페이지 ${data.pagination.page} / ${totalPages}`;
+
+                prevBtn.disabled = currentPage <= 1;
+                nextBtn.disabled = currentPage >= totalPages;
+
+                renderTable(data.inquiries);
+            } catch (err) {
+                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:40px; color:#d32f2f;">오류: ${err.message}</td></tr>`;
+            }
+        }
+
+        function renderTable(inquiries) {
+            if (!inquiries || inquiries.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:40px; color:#999;">문의가 없습니다</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = inquiries.map(inq => {
+                const total = inq.context_snapshot?.resData_snapshot?.total || '-';
+                const hospitalName = inq.context_snapshot?.hospital_name || '(미입력)';
+                const tags = (inq.interest_tags || []).map(tag => 
+                    `<span class="text-small" style="background:#eee; padding:2px 4px; border-radius:2px; margin-right:4px;">#${tag}</span>`
+                ).join('') || '-';
+                const phone = inq.contact_phone 
+                    ? inq.contact_phone.replace(/(\d{3})(\d{4})(\d{4})/, '$1-****-$3')
+                    : '-';
+
+                const isHighValue = typeof total === 'number' && total >= 50000;
+                const rowStyle = isHighValue ? 'background-color: #fff8f8;' : '';
+                const totalClass = isHighValue ? 'text-value-high' : '';
+
+                return `
+                <tr style="${rowStyle}">
+                    <td>${AdminAPI.utils.statusBadge(inq.status)}</td>
+                    <td>
+                        <div>${AdminAPI.utils.formatDate(inq.created_at).split(' ')[0]}</div>
+                        <div class="text-small text-muted">${AdminAPI.utils.formatDate(inq.created_at).split(' ')[1]}</div>
+                    </td>
+                    <td>
+                        <span class="${totalClass}">${AdminAPI.utils.formatNumber(total)}</span>
+                        ${isHighValue ? '<span class="text-signal">고잠재</span>' : ''}
+                    </td>
+                    <td>
+                        <div class="text-small text-muted">${inq.source_type || '-'} / ${inq.source_page || '-'}</div>
+                    </td>
+                    <td>
+                        <div style="font-weight:600;">${hospitalName}</div>
+                        <div class="text-small text-muted">${phone}</div>
+                    </td>
+                    <td>${tags}</td>
+                    <td><a href="inquiry_detail.html?id=${inq.inquiry_id}" class="btn-secondary" style="padding: 4px 12px; font-size: 0.8rem;">상세</a></td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        document.getElementById('applyFilterBtn').addEventListener('click', () => {
+            currentFilters = {};
+            const status = document.getElementById('filterStatus').value;
+            const sourceType = document.getElementById('filterSourceType').value;
+            if (status) currentFilters.status = status;
+            if (sourceType) currentFilters.source_type = sourceType;
+            currentPage = 1;
+            loadInquiries();
+        });
+
+        prevBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; loadInquiries(); } });
+        nextBtn.addEventListener('click', () => { if (currentPage < totalPages) { currentPage++; loadInquiries(); } });
+
+        loadInquiries();
+    });
+    </script>
+</body>
+</html>

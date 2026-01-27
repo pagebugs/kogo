@@ -11,6 +11,9 @@ const PORT = 3000;
 app.use(cors());
 app.use(bodyParser.json());
 
+// 정적 파일 서빙 (프로젝트 루트 기준)
+app.use(express.static(__dirname));
+
 // Database Config
 const dbConfig = {
     host: 'localhost',
@@ -975,6 +978,171 @@ app.get('/api/admin/stats', requireAdminKey, async (req, res) => {
         });
     } catch (err) {
         console.error('DB Error (Admin Stats):', err);
+        res.status(500).send({ error: 'Database error' });
+    }
+});
+
+// =========================================================
+// 5. 회원 관리 API (Admin only)
+// =========================================================
+app.get('/api/admin/users', requireAdminKey, async (req, res) => {
+    const { member_type, status, organization_id, page = 1, limit = 20 } = req.query;
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+
+    try {
+        let whereConditions = [];
+        let whereParams = [];
+
+        if (member_type) {
+            whereConditions.push('u.member_type = ?');
+            whereParams.push(member_type);
+        }
+        if (status) {
+            whereConditions.push('u.status = ?');
+            whereParams.push(status);
+        }
+        if (organization_id) {
+            whereConditions.push('u.organization_id = ?');
+            whereParams.push(organization_id);
+        }
+
+        const whereClause = whereConditions.length > 0 
+            ? 'WHERE ' + whereConditions.join(' AND ')
+            : '';
+
+        // 총 개수 조회
+        const [[{ total }]] = await pool.execute(
+            `SELECT COUNT(*) as total FROM user u ${whereClause}`,
+            whereParams
+        );
+
+        // 리스트 조회 (Organization JOIN)
+        const query = `
+            SELECT u.id, u.email, u.name, u.phone, u.company, u.position, u.status, 
+                   u.member_type, u.created_at, u.last_login_at,
+                   o.org_name, o.org_type
+            FROM user u
+            LEFT JOIN organization o ON u.organization_id = o.id
+            ${whereClause}
+            ORDER BY u.created_at DESC 
+            LIMIT ? OFFSET ?
+        `;
+        
+        const [rows] = await pool.execute(query, [...whereParams, parseInt(limit), offset]);
+
+        console.log(`[Admin User] List viewed (Filters: ${whereConditions.join(', ') || 'none'}, Page: ${page})`);
+        res.status(200).send({
+            users: rows,
+            pagination: {
+                total,
+                page: parseInt(page),
+                limit: parseInt(limit),
+                totalPages: Math.ceil(total / parseInt(limit))
+            }
+        });
+    } catch (err) {
+        console.error('DB Error (Admin Users):', err);
+        res.status(500).send({ error: 'Database error' });
+    }
+});
+
+app.get('/api/admin/users/:userId', requireAdminKey, async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const [rows] = await pool.execute(
+            `SELECT u.*, o.org_name, o.org_type, o.business_number, o.division
+             FROM user u
+             LEFT JOIN organization o ON u.organization_id = o.id
+             WHERE u.id = ?`,
+            [userId]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).send({ error: 'User not found' });
+        }
+
+        const user = rows[0];
+        // 비밀번호 해시는 클라이언트에 보내지 않음
+        delete user.password_hash;
+
+        console.log(`[Admin User] Detailed view: ID=${userId}, Email=${user.email}`);
+        res.status(200).send(user);
+    } catch (err) {
+        console.error('DB Error (Admin User View):', err);
+        res.status(500).send({ error: 'Database error' });
+    }
+});
+
+app.patch('/api/admin/users/:userId', requireAdminKey, async (req, res) => {
+    const { userId } = req.params;
+    const { member_type, status, organization_id, verification_status } = req.body;
+
+    // 허용된 필드만 추출
+    const updates = [];
+    const params = [];
+
+    if (member_type) { updates.push('member_type = ?'); params.push(member_type); }
+    if (status) { updates.push('status = ?'); params.push(status); }
+    if (organization_id !== undefined) { updates.push('organization_id = ?'); params.push(organization_id); }
+    if (verification_status) { 
+        updates.push('verification_status = ?'); 
+        params.push(verification_status);
+        if (verification_status === 'APPROVED') {
+            updates.push('verified_at = CURRENT_TIMESTAMP');
+            // verified_by는 현재 요청자 ID로 설정해야 하지만 
+            // 현재 Admin API Key 방식이므로 임시로 null 또는 특정 ID
+        }
+    }
+
+    if (updates.length === 0) {
+        return res.status(400).send({ error: 'No fields to update' });
+    }
+
+    try {
+        params.push(userId);
+        const [result] = await pool.execute(
+            `UPDATE user SET ${updates.join(', ')} WHERE id = ?`,
+            params
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).send({ error: 'User not found' });
+        }
+
+        console.log(`[Admin User] Updated: ID=${userId}, Changes: {${updates.join(', ')}}`);
+        res.status(200).send({ success: true, message: 'User updated successfully' });
+    } catch (err) {
+        console.error('DB Error (Admin User Update):', err);
+        res.status(500).send({ error: 'Database error' });
+    }
+});
+
+// =========================================================
+// 6. 조직(조합사) 관리 API (Admin only)
+// =========================================================
+app.get('/api/admin/organizations', requireAdminKey, async (req, res) => {
+    const { org_type, status } = req.query;
+
+    try {
+        let query = 'SELECT id, org_code, org_name, org_type, business_number, division, status FROM organization';
+        let conditions = [];
+        let params = [];
+
+        if (org_type) { conditions.push('org_type = ?'); params.push(org_type); }
+        if (status) { conditions.push('status = ?'); params.push(status); }
+
+        if (conditions.length > 0) {
+            query += ' WHERE ' + conditions.join(' AND ');
+        }
+        
+        query += ' ORDER BY org_name ASC';
+
+        const [rows] = await pool.execute(query, params);
+        console.log(`[Admin Org] List viewed (Type: ${org_type || 'all'}, Status: ${status || 'all'})`);
+        res.status(200).send({ organizations: rows });
+    } catch (err) {
+        console.error('DB Error (Admin Organizations):', err);
         res.status(500).send({ error: 'Database error' });
     }
 });

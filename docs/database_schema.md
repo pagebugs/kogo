@@ -1,12 +1,13 @@
 # TouchAd Database Schema Documentation
 
-Last Updated: 2026-01-21
+Last Updated: 2026-01-27
 
 ## 📋 Table of Contents
 - [event_log](#event_log)
 - [inquiry](#inquiry)
 - [insight_report](#insight_report)
 - [order](#order)
+- [organization](#organization) ← NEW
 - [session](#session)
 - [simulation](#simulation)
 - [simulation_access](#simulation_access)
@@ -120,11 +121,35 @@ Last Updated: 2026-01-21
 |---|---|---|---|---|---|---|
 | **id** | int(11) | NOT NULL | PRI | NULL | auto_increment |  |
 | **email** | varchar(255) | NOT NULL | UNI | NULL |  | 이메일 (로그인 ID) |
-| **password_hash** | varchar(255) | NOT NULL |  | NULL |  | 비밀번호 해시 (bcrypt) |
+| **password_hash** | varchar(255) | NULL |  | NULL |  | 비밀번호 해시 (bcrypt, 카카오 로그인 시 NULL) |
 | **name** | varchar(100) | NULL |  | NULL |  | 사용자 이름 |
 | **phone** | varchar(20) | NULL |  | NULL |  | 연락처 |
 | **company** | varchar(200) | NULL |  | NULL |  | 회사명 |
+| **position** | varchar(100) | NULL |  | NULL |  | 직책 |
 | **status** | enum('active','inactive','pending') | NULL | MUL | pending |  | 계정 상태 |
+| **member_type** | enum('ADMIN','COOP_MEMBER','COOP_ASSOCIATE','PARTNER','GENERAL') | NULL | MUL | GENERAL |  | 회원 유형 |
+| **kakao_id** | bigint(20) | NULL | UNI | NULL |  | 카카오 계정 고유 ID |
+| **kakao_email** | varchar(255) | NULL |  | NULL |  | 카카오 프로필 이메일 |
+| **kakao_nickname** | varchar(100) | NULL |  | NULL |  | 카카오 닉네임 |
+| **kakao_linked_at** | datetime | NULL |  | NULL |  | 카카오 연동 시각 |
+| **verification_status** | enum('NONE','PENDING','APPROVED','REJECTED') | NULL | MUL | NONE |  | 자격 확인 상태 (PARTNER용) |
+| **verified_at** | datetime | NULL |  | NULL |  | 승인 시각 |
+| **verified_by** | int(11) | NULL |  | NULL |  | 승인 관리자 ID |
+| **organization_id** | int(11) | NULL | MUL | NULL |  | 소속 조직 ID (FK → organization.id) |
 | **created_at** | datetime | NULL |  | current_timestamp() |  |  |
 | **updated_at** | datetime | NULL |  | current_timestamp() | on update current_timestamp() |  |
 | **last_login_at** | datetime | NULL |  | NULL |  | 마지막 로그인 시각 |
+
+## organization
+| Column | Type | Null | Key | Default | Extra | Comment |
+|---|---|---|---|---|---|---|
+| **id** | int(11) | NOT NULL | PRI | NULL | auto_increment |  |
+| **org_code** | varchar(20) | NOT NULL | UNI | NULL |  | 조직 고유 코드 (예: ORG-001) |
+| **org_name** | varchar(200) | NOT NULL |  | NULL |  | 업체명 (조합사명) |
+| **org_type** | enum('COOP','ASSOCIATE_COOP','PARTNER_CORP') | NOT NULL |  | NULL |  | COOP=조합사, ASSOCIATE_COOP=준조합사, PARTNER_CORP=파트너법인 |
+| **business_number** | varchar(20) | NULL | MUL | NULL |  | 사업자등록번호 |
+| **division** | varchar(100) | NULL |  | NULL |  | 소속 분과 (옵션) |
+| **status** | enum('ACTIVE','INACTIVE','PENDING') | NULL | MUL | ACTIVE |  | 조직 상태 |
+| **created_at** | datetime | NULL |  | current_timestamp() |  |  |
+| **updated_at** | datetime | NULL |  | current_timestamp() | on update current_timestamp() |  |
+

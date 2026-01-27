@@ -3,173 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TouchAd Admin - Dashboard</title>
+    <title>Kogo 관리자 - SaaS 대시보드</title>
     <link rel="stylesheet" href="../assets/css/style.css">
     <link rel="stylesheet" href="./assets/css/admin.css">
-    <!-- SUIT Font -->
     <link href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT/fonts/variable/woff2/SUIT-Variable.css" rel="stylesheet">
 </head>
 <body class="admin-body">
 
-    <!-- Header -->
-    <header class="admin-header">
-        <div class="admin-logo">TouchAd Admin</div>
-        <nav class="admin-nav">
-            <a href="index.html" class="active">Dashboard</a>
-            <a href="inquiry_list.html">Inquiry (Sales)</a>
-            <a href="order_list.html">Orders</a>
-        </nav>
-        <div class="admin-user-info text-small">
-            Manager님
+    <!-- 1depth: Global Navigation Bar -->
+    <nav class="global-nav">
+        <div class="global-nav-logo">Kogo</div>
+        <div class="global-nav-menu">
+            <a href="index.html" class="active">대시보드</a>
+            <div class="dropdown">
+                <a href="#">서비스 관리 ▾</a>
+                <div class="dropdown-content">
+                    <a href="touchad/index.html">터치애드</a>
+                    <a href="#" style="color:#666;">코고케어 (예정)</a>
+                    <a href="#" style="color:#666;">조합원 관리 (예정)</a>
+                </div>
+            </div>
+            <a href="#" style="color:#666;">회원 관리</a>
+            <a href="#" style="color:#666;">빌링</a>
+            <a href="#" style="color:#666;">설정</a>
         </div>
-    </header>
+        <div class="global-nav-user">관리자님</div>
+    </nav>
 
-    <!-- Main Content -->
     <main class="admin-container">
+        <h1 style="font-size: 1.75rem; font-weight: 700; margin-bottom: 8px;">Kogo SaaS 관리자</h1>
+        <p style="color: #666; margin-bottom: 32px;">한국글로벌헬스케어협동조합 통합 관리 플랫폼</p>
+
+        <h2 style="font-size: 1.1rem; color: #666; margin-bottom: 16px;">📦 서비스 관리</h2>
         
-        <!-- KPI Cards (동적 로드) -->
-        <div class="kpi-grid">
-            <div class="kpi-card">
-                <div class="kpi-title">Total Inquiries</div>
-                <div class="kpi-value" id="kpiTotal">-</div>
-                <div class="kpi-trend text-small" id="kpiTotalTrend">Loading...</div>
+        <div class="service-cards">
+            <!-- 터치애드 -->
+            <div class="service-card" onclick="location.href='touchad/index.html'">
+                <div class="service-card-header">
+                    <span class="service-card-icon">📱</span>
+                    <span class="service-card-title">터치애드</span>
+                </div>
+                <div class="service-card-desc">
+                    신용카드 및 교통카드 결제 데이터 기반 초개인화 타겟팅 광고 플랫폼. 의료 기관 대상 로컬 마케팅 솔루션.
+                </div>
+                <div class="service-card-stats">
+                    <div class="service-stat">
+                        <div class="service-stat-value" id="touchadInquiries">-</div>
+                        <div class="service-stat-label">신규 문의</div>
+                    </div>
+                    <div class="service-stat">
+                        <div class="service-stat-value" id="touchadOrders">-</div>
+                        <div class="service-stat-label">진행 주문</div>
+                    </div>
+                    <div class="service-stat">
+                        <div class="service-stat-value" id="touchadSessions">-</div>
+                        <div class="service-stat-label">오늘 세션</div>
+                    </div>
+                </div>
             </div>
-            <div class="kpi-card card-emphasis" onclick="location.href='inquiry_list.html?status=qualified'" style="cursor:pointer;">
-                <div class="kpi-title">Ready to Order (Qualified)</div>
-                <div class="kpi-value" id="kpiQualified">-</div>
-                <div class="kpi-trend text-small">Action Required (클릭하여 이동)</div>
+
+            <!-- 코고케어 -->
+            <div class="service-card disabled">
+                <div class="service-card-header">
+                    <span class="service-card-icon">💊</span>
+                    <span class="service-card-title">코고케어</span>
+                    <span class="badge-coming-soon">예정</span>
+                </div>
+                <div class="service-card-desc">
+                    조합원 건강 관리 및 복지 서비스. 건강검진 연계, 건강 상담 예약, 건강정보 제공.
+                </div>
+                <div class="service-card-stats">
+                    <div class="service-stat">
+                        <div class="service-stat-value">-</div>
+                        <div class="service-stat-label">활성 사용자</div>
+                    </div>
+                    <div class="service-stat">
+                        <div class="service-stat-value">-</div>
+                        <div class="service-stat-label">이번 달 예약</div>
+                    </div>
+                </div>
             </div>
-            <div class="kpi-card">
-                <div class="kpi-title">New Inquiries</div>
-                <div class="kpi-value" id="kpiNew">-</div>
-                <div class="kpi-trend text-small">처리 대기 중</div>
+
+            <!-- 조합원 관리 -->
+            <div class="service-card disabled">
+                <div class="service-card-header">
+                    <span class="service-card-icon">👥</span>
+                    <span class="service-card-title">조합원 관리</span>
+                    <span class="badge-coming-soon">예정</span>
+                </div>
+                <div class="service-card-desc">
+                    조합원 가입/탈퇴 관리, 출자금 관리, 조합 운영 현황 대시보드.
+                </div>
+                <div class="service-card-stats">
+                    <div class="service-stat">
+                        <div class="service-stat-value">-</div>
+                        <div class="service-stat-label">총 조합원</div>
+                    </div>
+                    <div class="service-stat">
+                        <div class="service-stat-value">-</div>
+                        <div class="service-stat-label">신규 가입</div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <h2 class="section-title" style="text-align: left; margin-bottom: 20px; font-size: 1.25rem;">Recent Inquiries</h2>
-        
-        <!-- Recent Inquiry Table (동적 로드) -->
-        <div class="data-table-wrapper mb-8">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th style="width: 100px;">Status</th>
-                        <th style="width: 140px;">Time</th>
-                        <th>Total Population</th>
-                        <th>Source</th>
-                        <th>Hospital Name</th>
-                        <th style="width: 80px;">Action</th>
-                    </tr>
-                </thead>
-                <tbody id="recentInquiryTable">
-                    <tr><td colspan="6" style="text-align:center; padding:30px;">Loading...</td></tr>
-                </tbody>
-            </table>
+        <h2 style="font-size: 1.1rem; color: #666; margin-bottom: 16px; margin-top: 40px;">⚡ 바로가기</h2>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <a href="touchad/inquiry_list.html" class="btn-secondary" style="padding: 10px 20px;">터치애드 문의 관리</a>
+            <a href="touchad/order_list.html" class="btn-secondary" style="padding: 10px 20px;">터치애드 주문 관리</a>
+            <a href="#" class="btn-secondary" style="padding: 10px 20px; opacity: 0.5; pointer-events: none;">회원 관리</a>
+            <a href="#" class="btn-secondary" style="padding: 10px 20px; opacity: 0.5; pointer-events: none;">빌링 관리</a>
         </div>
-
-        <h2 class="section-title" style="text-align: left; margin-bottom: 20px; font-size: 1.25rem;">Recent Orders</h2>
-        
-        <!-- Recent Order Preview (동적 로드) -->
-        <div class="data-table-wrapper">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Status</th>
-                        <th>Order ID</th>
-                        <th>Amount</th>
-                        <th>Linked Inquiry</th>
-                        <th>Created</th>
-                    </tr>
-                </thead>
-                <tbody id="recentOrderTable">
-                    <tr><td colspan="5" style="text-align:center; padding:30px;">Loading...</td></tr>
-                </tbody>
-            </table>
-        </div>
-
     </main>
 
-    <!-- Admin API Module -->
+    <!-- Admin JS Modules -->
     <script src="./assets/js/admin-api.js"></script>
+    <script src="./assets/js/admin.js"></script>
     
     <script>
     document.addEventListener('DOMContentLoaded', async () => {
-        // 통계 로드
+        // 터치애드 통계 로드
         try {
             const stats = await AdminAPI.stats.get();
-            
-            document.getElementById('kpiTotal').textContent = stats.inquiry.total || 0;
-            document.getElementById('kpiNew').textContent = stats.inquiry.new_count || 0;
-            document.getElementById('kpiQualified').textContent = stats.inquiry.qualified_count || 0;
-            document.getElementById('kpiTotalTrend').textContent = 
-                `${stats.inquiry.contacted_count || 0} contacted, ${stats.inquiry.converted_count || 0} converted`;
+            document.getElementById('touchadInquiries').textContent = stats.inquiry?.new_count || 0;
+            document.getElementById('touchadOrders').textContent = 
+                (stats.order?.ordered_count || 0) + (stats.order?.running_count || 0);
+            document.getElementById('touchadSessions').textContent = stats.today?.sessions_today || 0;
         } catch (err) {
-            console.error('Stats load failed:', err);
-        }
-
-        // 최근 Inquiry 로드
-        try {
-            const data = await AdminAPI.inquiries.list({ limit: 5 });
-            renderRecentInquiries(data.inquiries);
-        } catch (err) {
-            document.getElementById('recentInquiryTable').innerHTML = 
-                `<tr><td colspan="6" style="text-align:center; color:#d32f2f;">Error: ${err.message}</td></tr>`;
-        }
-
-        // 최근 Order 로드
-        try {
-            const data = await AdminAPI.orders.list({ limit: 5 });
-            renderRecentOrders(data.orders);
-        } catch (err) {
-            document.getElementById('recentOrderTable').innerHTML = 
-                `<tr><td colspan="5" style="text-align:center; color:#d32f2f;">Error: ${err.message}</td></tr>`;
-        }
-
-        function renderRecentInquiries(inquiries) {
-            const tbody = document.getElementById('recentInquiryTable');
-            
-            if (!inquiries || inquiries.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">No inquiries yet</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = inquiries.map(inq => {
-                const total = inq.context_snapshot?.resData_snapshot?.total || '-';
-                const hospitalName = inq.context_snapshot?.hospital_name || '(미입력)';
-                const isHighValue = typeof total === 'number' && total >= 50000;
-
-                return `
-                <tr>
-                    <td>${AdminAPI.utils.statusBadge(inq.status)}</td>
-                    <td class="text-small">${AdminAPI.utils.formatDate(inq.created_at)}</td>
-                    <td><span class="${isHighValue ? 'text-value-high' : ''}">${AdminAPI.utils.formatNumber(total)}</span></td>
-                    <td class="text-small text-muted">${inq.source_type || '-'} / ${inq.source_page || '-'}</td>
-                    <td>${hospitalName}</td>
-                    <td><a href="inquiry_detail.html?id=${inq.inquiry_id}" class="btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;">View</a></td>
-                </tr>
-                `;
-            }).join('');
-        }
-
-        function renderRecentOrders(orders) {
-            const tbody = document.getElementById('recentOrderTable');
-            
-            if (!orders || orders.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">No orders yet</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = orders.map(order => {
-                return `
-                <tr>
-                    <td>${AdminAPI.utils.statusBadge(order.status)}</td>
-                    <td style="font-weight:600;">${order.order_id}</td>
-                    <td>${order.amount ? AdminAPI.utils.formatNumber(order.amount) + ' 원' : '-'}</td>
-                    <td>${order.inquiry_id || '-'}</td>
-                    <td class="text-small">${AdminAPI.utils.formatDate(order.created_at).split(' ')[0]}</td>
-                </tr>
-                `;
-            }).join('');
+            console.warn('Stats load failed:', err);
         }
     });
     </script>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kogo Admin - 회원 상세</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/admin.css">
+    <!-- SUIT Font -->
+    <link href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT/fonts/variable/woff2/SUIT-Variable.css" rel="stylesheet">
+</head>
+<body class="admin-body">
+
+    <!-- 1depth: Global Navigation Bar -->
+    <nav class="global-nav">
+        <div class="global-nav-logo">Kogo</div>
+        <div class="global-nav-menu">
+            <a href="../index.html">대시보드</a>
+            <div class="dropdown">
+                <a href="#">서비스 관리 ▾</a>
+                <div class="dropdown-content">
+                    <a href="../touchad/index.html">터치애드</a>
+                    <a href="#" style="color:#666;">코고케어 (예정)</a>
+                    <a href="#" style="color:#666;">조합원 관리 (예정)</a>
+                </div>
+            </div>
+            <a href="index.html" class="active">회원 관리</a>
+            <a href="#" style="color:#666;">빌링</a>
+            <a href="#" style="color:#666;">설정</a>
+        </div>
+        <div class="global-nav-user">관리자님</div>
+    </nav>
+
+    <main class="admin-container">
+        <div class="admin-header-flex" style="margin-bottom: 32px;">
+            <div style="display:flex; align-items:center; gap:16px;">
+                <a href="index.html" class="btn-secondary" style="padding: 8px 16px; font-size: 0.9rem;">← 회원 목록으로</a>
+                <h1 class="admin-page-title" style="margin-bottom:0; font-size: 1.75rem; font-weight: 700;">회원 상세 설정</h1>
+            </div>
+        </div>
+
+        <div class="detail-grid user-detail">
+            <!-- 왼쪽: 기본 정보 요약 -->
+            <div class="info-card">
+                <div style="text-align:center; margin-bottom:32px;">
+                    <div id="userBadge" style="margin-bottom:12px;"></div>
+                    <h2 id="userName" style="font-size:1.5rem; font-weight: 700; margin-bottom:6px;">-</h2>
+                    <div id="userEmail" class="text-muted" style="font-size:0.95rem;">-</div>
+                </div>
+
+                <div class="info-row">
+                    <span class="info-label">고유 ID</span>
+                    <span class="info-value" id="userId">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">가입 일시</span>
+                    <span class="info-value" id="createdAt">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">마지막 접속</span>
+                    <span class="info-value" id="lastLoginAt">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">연락처</span>
+                    <span class="info-value" id="userPhone">-</span>
+                </div>
+            </div>
+
+            <!-- 오른쪽: 수정 폼 -->
+            <div class="info-card">
+                <div class="section-header">
+                    <h3 class="section-title">회원 권한 및 상태 관리</h3>
+                    <button class="btn-primary" id="btnSave" style="padding: 10px 24px;">수정사항 저장</button>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                    <div class="form-group">
+                        <label>회원 유형 분류</label>
+                        <select id="memberType">
+                            <option value="GENERAL">일반회원 (DEFAULT)</option>
+                            <option value="COOP_MEMBER">조합회사 회원 (정회원)</option>
+                            <option value="COOP_ASSOCIATE">조합 준회원</option>
+                            <option value="PARTNER">마켓플레이스 파트너</option>
+                            <option value="ADMIN">시스템 관리자 (ADMIN)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>서비스 이용 상태</label>
+                        <select id="accountStatus">
+                            <option value="active">정상 활성</option>
+                            <option value="pending">승인 대기</option>
+                            <option value="inactive">이용 정지 / 탈퇴</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="coopSection" style="display:none; padding: 20px; background: #fafafa; border-radius: 8px; margin-bottom: 24px; border: 1px solid #f0f0f0;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label>소속 조합사 / 법인 배정</label>
+                        <select id="organizationId">
+                            <option value="">(배정되지 않음)</option>
+                        </select>
+                        <p class="text-small text-muted" style="margin-top: 8px;">조합원 회원의 경우 소속 법인 선택이 필수입니다.</p>
+                    </div>
+                </div>
+
+                <div id="partnerSection" style="display:none; padding: 20px; background: #fafafa; border-radius: 8px; margin-bottom: 24px; border: 1px solid #f0f0f0;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label>파트너십 자격 확인</label>
+                        <select id="verificationStatus">
+                            <option value="NONE">정보 없음</option>
+                            <option value="PENDING">증빙 서류 검토 중</option>
+                            <option value="APPROVED">최종 승인 완료</option>
+                            <option value="REJECTED">심사 반려 (부적격)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                    <div class="form-group">
+                        <label>회사/소속명 (프로필 정보)</label>
+                        <input type="text" id="userCompany" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label>직책/직함 (프로필 정보)</label>
+                        <input type="text" id="userPosition" readonly>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+
+    <script src="../assets/js/admin-api.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('id');
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!userId) {
+                alert('회원 ID가 없습니다.');
+                location.href = 'index.html';
+                return;
+            }
+
+            await Promise.all([
+                loadOrganizations(),
+                loadUserDetail()
+            ]);
+
+            // 유형 변경 시 섹션 가시성 조절
+            document.getElementById('memberType').addEventListener('change', (e) => {
+                toggleSections(e.target.value);
+            });
+
+            // 저장 버튼
+            document.getElementById('btnSave').addEventListener('click', saveUserDetail);
+        });
+
+        async function loadOrganizations() {
+            try {
+                const data = await AdminAPI.organizations.list();
+                const select = document.getElementById('organizationId');
+                data.organizations.forEach(org => {
+                    const opt = document.createElement('option');
+                    opt.value = org.id;
+                    opt.textContent = `[${org.org_type}] ${org.org_name}`;
+                    select.appendChild(opt);
+                });
+            } catch (err) {
+                console.error('Organization load failed:', err);
+            }
+        }
+
+        async function loadUserDetail() {
+            try {
+                const user = await AdminAPI.users.view(userId);
+                
+                // 기본 정보 표시
+                document.getElementById('userId').textContent = user.id;
+                document.getElementById('userName').textContent = user.name || '(이름없음)';
+                document.getElementById('userEmail').textContent = user.email;
+                document.getElementById('userPhone').textContent = user.phone || '-';
+                document.getElementById('createdAt').textContent = AdminAPI.utils.formatDate(user.created_at);
+                document.getElementById('lastLoginAt').textContent = AdminAPI.utils.formatDate(user.last_login_at);
+                document.getElementById('userCompany').value = user.company || '';
+                document.getElementById('userPosition').value = user.position || '';
+
+                document.getElementById('userBadge').innerHTML = AdminAPI.utils.statusBadge(user.member_type);
+
+                // 폼 설정
+                document.getElementById('memberType').value = user.member_type;
+                document.getElementById('accountStatus').value = user.status;
+                document.getElementById('organizationId').value = user.organization_id || '';
+                document.getElementById('verificationStatus').value = user.verification_status || 'NONE';
+
+                toggleSections(user.member_type);
+
+            } catch (err) {
+                alert('회원 정보를 불러오지 못했습니다: ' + err.message);
+            }
+        }
+
+        function toggleSections(type) {
+            const coopSec = document.getElementById('coopSection');
+            const partnerSec = document.getElementById('partnerSection');
+
+            coopSec.style.display = (type === 'COOP_MEMBER' || type === 'COOP_ASSOCIATE') ? 'block' : 'none';
+            partnerSec.style.display = (type === 'PARTNER') ? 'block' : 'none';
+        }
+
+        async function saveUserDetail() {
+            const data = {
+                member_type: document.getElementById('memberType').value,
+                status: document.getElementById('accountStatus').value,
+                organization_id: document.getElementById('organizationId').value || null,
+                verification_status: document.getElementById('verificationStatus').value
+            };
+
+            try {
+                await AdminAPI.users.update(userId, data);
+                alert('저장되었습니다.');
+                location.reload();
+            } catch (err) {
+                alert('저장 실패: ' + err.message);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kogo 관리자 - 터치애드 주문 관리</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/admin.css">
+    <link href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT/fonts/variable/woff2/SUIT-Variable.css" rel="stylesheet">
+</head>
+<body class="admin-body">
+
+    <!-- 1depth: Global Navigation Bar -->
+    <nav class="global-nav">
+        <div class="global-nav-logo">Kogo</div>
+        <div class="global-nav-menu">
+            <a href="../index.html">대시보드</a>
+            <div class="dropdown">
+                <a href="#" class="active">서비스 관리 ▾</a>
+                <div class="dropdown-content">
+                    <a href="index.html" class="active">터치애드</a>
+                    <a href="#" style="color:#666;">코고케어 (예정)</a>
+                </div>
+            </div>
+            <a href="#" style="color:#666;">회원 관리</a>
+            <a href="#" style="color:#666;">빌링</a>
+            <a href="#" style="color:#666;">설정</a>
+        </div>
+        <div class="global-nav-user">관리자님</div>
+    </nav>
+
+    <!-- 3depth: TouchAd Sub Navigation -->
+    <div class="service-nav">
+        <span class="service-nav-title">터치애드</span>
+        <div class="service-nav-menu">
+            <a href="index.html">대시보드</a>
+            <a href="inquiry_list.html">문의 관리</a>
+            <a href="order_list.html" class="active">주문 관리</a>
+            <a href="#" style="color:#999;">리포트</a>
+            <a href="#" style="color:#999;">설정</a>
+        </div>
+    </div>
+
+    <main class="admin-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 class="section-title" style="text-align: left; margin: 0; font-size: 1.5rem;">주문 관리</h2>
+            <div class="text-small text-muted" id="totalCount">로딩 중...</div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <select class="filter-select" id="filterStatus">
+                <option value="">상태 (전체)</option>
+                <option value="DRAFT">DRAFT (작성중)</option>
+                <option value="CONFIRMED">CONFIRMED (확정)</option>
+                <option value="ORDERED">ORDERED (발주)</option>
+                <option value="RUNNING">RUNNING (집행중)</option>
+                <option value="DONE">DONE (완료)</option>
+                <option value="CANCELLED">CANCELLED (취소)</option>
+            </select>
+            <button class="btn-primary" style="padding: 6px 16px; font-size: 0.9rem;" id="applyFilterBtn">필터 적용</button>
+        </div>
+
+        <!-- Order Table -->
+        <div class="data-table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 100px;">상태</th>
+                        <th style="width: 150px;">주문 ID</th>
+                        <th>연결된 문의</th>
+                        <th style="text-align: right;">금액 (원)</th>
+                        <th style="width: 150px;">생성일</th>
+                        <th>관리자 메모</th>
+                        <th style="width: 80px;">액션</th>
+                    </tr>
+                </thead>
+                <tbody id="orderTableBody">
+                    <tr><td colspan="7" style="text-align:center; padding:40px;">로딩 중...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        <div style="text-align: center; margin-top: 20px;" id="paginationArea">
+            <button class="btn-secondary" id="prevBtn" disabled>이전</button>
+            <span style="margin: 0 10px; font-size: 0.9rem;" id="pageInfo">페이지 1 / 1</span>
+            <button class="btn-secondary" id="nextBtn">다음</button>
+        </div>
+    </main>
+
+    <!-- Admin JS Modules -->
+    <script src="../assets/js/admin-api.js"></script>
+    <script src="../assets/js/admin.js"></script>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        let currentPage = 1;
+        let totalPages = 1;
+        let currentFilters = {};
+
+        const tableBody = document.getElementById('orderTableBody');
+        const totalCountEl = document.getElementById('totalCount');
+        const pageInfoEl = document.getElementById('pageInfo');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        async function loadOrders() {
+            tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:40px;">로딩 중...</td></tr>';
+
+            try {
+                const filters = { ...currentFilters, page: currentPage, limit: 20 };
+                const data = await AdminAPI.orders.list(filters);
+                
+                totalCountEl.textContent = `총 ${data.pagination.total}건`;
+                totalPages = data.pagination.totalPages;
+                pageInfoEl.textContent = `페이지 ${data.pagination.page} / ${totalPages || 1}`;
+
+                prevBtn.disabled = currentPage <= 1;
+                nextBtn.disabled = currentPage >= totalPages;
+
+                renderTable(data.orders);
+            } catch (err) {
+                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:40px; color:#d32f2f;">오류: ${err.message}</td></tr>`;
+            }
+        }
+
+        function renderTable(orders) {
+            if (!orders || orders.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:40px; color:#999;">주문이 없습니다</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = orders.map(order => {
+                const inquirySummary = order.inquiry_summary;
+                const hospitalName = inquirySummary?.hospital_name || '-';
+                const inquiryLink = order.inquiry_id 
+                    ? `<a href="inquiry_detail.html?id=${order.inquiry_id}" style="text-decoration: underline; color: #666;">${order.inquiry_id}</a><br><span class="text-small text-muted">${hospitalName}</span>`
+                    : '-';
+
+                const isDone = order.status === 'DONE' || order.status === 'CANCELLED';
+                const rowStyle = isDone ? 'background-color: #f9f9f9; color: #999;' : '';
+
+                return `
+                <tr style="${rowStyle}">
+                    <td>${AdminAPI.utils.statusBadge(order.status)}</td>
+                    <td style="font-weight: 600;">${order.order_id}</td>
+                    <td>${inquiryLink}</td>
+                    <td style="text-align: right; font-weight: 700;">${order.amount ? AdminAPI.utils.formatNumber(order.amount) : '-'}</td>
+                    <td>${AdminAPI.utils.formatDate(order.created_at).split(' ')[0]}</td>
+                    <td>${order.memo || '-'}</td>
+                    <td>
+                        <button class="btn-secondary status-btn" data-order-id="${order.order_id}" data-current-status="${order.status}" style="padding: 4px 8px; font-size: 0.8rem;">변경</button>
+                    </td>
+                </tr>
+                `;
+            }).join('');
+
+            document.querySelectorAll('.status-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const orderId = btn.dataset.orderId;
+                    const currentStatus = btn.dataset.currentStatus;
+                    
+                    const nextStatuses = {
+                        'DRAFT': 'CONFIRMED',
+                        'CONFIRMED': 'ORDERED',
+                        'ORDERED': 'RUNNING',
+                        'RUNNING': 'DONE'
+                    };
+
+                    const nextStatus = nextStatuses[currentStatus];
+                    if (!nextStatus) {
+                        alert('이미 최종 상태입니다.');
+                        return;
+                    }
+
+                    if (!confirm(`상태를 ${currentStatus} → ${nextStatus}로 변경하시겠습니까?`)) return;
+
+                    try {
+                        await AdminAPI.orders.updateStatus(orderId, nextStatus);
+                        alert('상태가 변경되었습니다.');
+                        loadOrders();
+                    } catch (err) {
+                        alert('상태 변경 실패: ' + err.message);
+                    }
+                });
+            });
+        }
+
+        document.getElementById('applyFilterBtn').addEventListener('click', () => {
+            currentFilters = {};
+            const status = document.getElementById('filterStatus').value;
+            if (status) currentFilters.status = status;
+            currentPage = 1;
+            loadOrders();
+        });
+
+        prevBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; loadOrders(); } });
+        nextBtn.addEventListener('click', () => { if (currentPage < totalPages) { currentPage++; loadOrders(); } });
+
+        loadOrders();
+    });
+    </script>
+</body>
+</html>

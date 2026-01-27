@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>터치애드 - 시장 분석 인사이트</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT/fonts/variable/woff2/SUIT-Variable.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/insight.css">
+  <link rel="stylesheet" href="../assets/css/gnb.css">
+  <link rel="stylesheet" href="../assets/css/inquiry.css">
+  <!-- Chart.js 유지 (추후 복원용) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- CONFIG JS (API Key 등) -->
+  <script src="../assets/js/config.js"></script>
+</head>
+<body class="has-gnb">
+
+<!-- =========================================================
+<!-- HEADER (Loaded Dynamically) -->
+<div id="include-header"></div>
+
+  <div class="container dashboard-container">
+    
+    <!-- 1. Header: Context & Authority -->
+    <header class="insight-header">
+      <div class="insight-title-group">
+        <h1>Market Intelligence</h1>
+        <div class="insight-meta">
+          <span class="hospital-badge" id="hospitalName">병원명</span>
+          <span>진료권 시장 규모 및 타겟 집중도 분석</span>
+        </div>
+      </div>
+      <div>
+        <span class="text-small text-muted" id="currentDate">2026.01.15 기준</span>
+      </div>
+    </header>
+
+    <!-- 2. Insight Box (데이터 상단 이동) -->
+    <div class="insight-box-row">
+      <div class="insight-icon">💡</div>
+      <div class="insight-text" id="insightBoxText">
+        "이 지역의 30대 여성 비중은 전국 평균 대비 <span style="color:var(--color-black); font-weight:700;">1.4배</span>입니다. 
+        성형/피부과에 최적화된 고관여 시장입니다."
+      </div>
+    </div>
+
+    <!-- 3. KPI Cards: The "Ah-ha" Moment -->
+    <div class="kpi-row">
+      <!-- KPI 1: Scale (Market Activity Index) -->
+      <div class="kpi-card active" id="card-scale">
+        <div>
+          <div class="kpi-label">원장님을 모르는 잠재 환자</div>
+          <div class="kpi-value-group">
+            <span class="kpi-value" id="val-scale">0</span>
+            <span class="kpi-unit">명</span>
+          </div>
+        </div>
+        <div class="kpi-desc">지금 이 순간에도 경쟁 병원을 찾고 있습니다</div>
+      </div>
+
+      <!-- KPI 2: Precision (Core Target Density) -->
+      <div class="kpi-card" id="card-precision">
+        <div>
+          <div class="kpi-label">30대 핵심층 비중</div>
+          <div class="kpi-value-group">
+            <span class="kpi-value" id="val-precision">0</span>
+            <span class="kpi-unit">%</span>
+          </div>
+        </div>
+        <div class="kpi-desc">성형/피부 시술 최다 소비 연령대</div>
+      </div>
+
+      <!-- KPI 3: Relevance (Category Fit) -->
+      <div class="kpi-card" id="card-relevance">
+        <div>
+          <div class="kpi-label">여성 고객 점유율</div>
+          <div class="kpi-value-group">
+            <span class="kpi-value" id="val-relevance">0</span>
+            <span class="kpi-unit">%</span>
+          </div>
+        </div>
+        <div class="kpi-desc">뷰티·건강 소비 주도층</div>
+      </div>
+
+      <!-- KPI 4: Reliability (Data Source) -->
+      <div class="kpi-card info-card">
+        <div>
+          <div class="kpi-label">데이터 신뢰도 검증</div>
+          <div class="kpi-value">Verified<br>Real Data</div>
+        </div>
+        <div class="kpi-desc">금융권 결제 데이터 기반<br>실시간 분석 완료</div>
+      </div>
+    </div>
+
+    <!-- 4. Map Section (단독 배치) -->
+    <div class="map-panel">
+      <div class="panel-header">
+        <div class="panel-title">진료권 지도</div>
+      </div>
+      <div class="map-section-full" id="view-map">
+        <div id="kakaoMap"></div>
+      </div>
+    </div>
+
+    <!-- 5. Premium Teaser Section (Paywall Style) -->
+    <div class="premium-teaser-section">
+      
+      <!-- Locked Content Area (Gradient Fade) -->
+      <div class="locked-content-wrapper">
+        <!-- Opportunity Alert (Partially Visible) -->
+        <div class="alert-box-standalone">
+          <div class="alert-title">
+            <span>⚡ Opportunity Alert</span>
+          </div>
+          <div class="alert-desc">
+            이 <strong id="alert-target-count">12,500</strong>명 중 원장님 병원을 아는 사람은 몇 명일까요?<br><br>
+            터치애드는 <strong>클릭당 50원</strong>으로 이들에게 도달합니다.<br>
+            (기존 키워드 광고 대비 1/14 비용)
+          </div>
+        </div>
+
+        <!-- AI Insight Section (Teaser) -->
+        <section class="ai-insight-section" id="aiInsightSection">
+          <div class="ai-insight-card">
+            <div class="ai-insight-header">
+              <span class="ai-insight-icon">🤖</span>
+              <h3 class="ai-insight-title">AI 인사이트</h3>
+            </div>
+            <div class="ai-insight-content" id="aiInsightText">
+              <!-- GPT 해석 메시지가 여기에 렌더링됩니다 -->
+            </div>
+          </div>
+        </section>
+
+        <!-- Gradient Fade Overlay -->
+        <div class="content-fade-overlay"></div>
+      </div>
+
+      <!-- Subscription CTA Card -->
+      <div class="subscription-card">
+        <div class="subscription-badge">🔒 Premium Insight</div>
+        <h3 class="subscription-title">전체 분석 결과를 확인하세요</h3>
+        <p class="subscription-desc">
+          회원 가입 후 <strong>상세 인사이트</strong>와 <strong>맞춤 컨설팅</strong>을 제공받으세요.
+        </p>
+        
+        <div class="subscription-benefits">
+          <div class="benefit-item">
+            <span class="benefit-icon">📊</span>
+            <span>경쟁 병원 대비 포지셔닝 분석</span>
+          </div>
+          <div class="benefit-item">
+            <span class="benefit-icon">🎯</span>
+            <span>타겟 세그먼트별 상세 인사이트</span>
+          </div>
+          <div class="benefit-item">
+            <span class="benefit-icon">📈</span>
+            <span>월간 트렌드 변화 추적</span>
+          </div>
+        </div>
+
+        <div class="subscription-cta">
+          <button class="cta-btn-kakao" id="kakaoLoginBtn">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="#3C1E1E">
+              <path d="M12 3C6.48 3 2 6.58 2 11c0 2.84 1.86 5.33 4.64 6.74-.15.56-.55 2.01-.63 2.32-.1.39.14.38.3.28.12-.08 1.9-1.26 2.67-1.77.65.1 1.32.15 2.02.15 5.52 0 10-3.58 10-8s-4.48-8-10-8z"/>
+            </svg>
+            카카오로 3초 만에 시작하기
+          </button>
+        </div>
+
+        <p class="subscription-note">
+          가입 시 <strong>무료 상담</strong>이 자동 신청됩니다.<br>
+          담당 마케터가 24시간 내 연락드립니다.
+        </p>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         FOOTER (Loaded Dynamically)
+    ========================================================= -->
+    <div id="include-footer"></div>
+
+  </div>
+
+  <!-- Common Scripts -->
+  <script src="../assets/js/gnb.js"></script>
+  <script src="../assets/js/ui-loader.js"></script>
+  
+  <!-- Sticky CTA Bar -->
+  <div class="sticky-cta-bar">
+    <div class="cta-container">
+      <div class="cta-message">
+        <strong id="sticky-target-count">12,000</strong>명의 잠재 환자에게 먼저 닿으세요.
+      </div>
+      <div class="cta-buttons">
+        <a href="#" class="cta-btn cta-btn-secondary" onclick="alert('준비 중입니다.')">상세 리포트 받기</a>
+        <button type="button" class="cta-btn cta-btn-primary" id="openInquiryBtn">이 데이터 기반 문의하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       Contextual Inquiry Modal
+       ⚠️ This is NOT a CS ticket. It captures where user understanding stopped.
+  ========================================================= -->
+  <div id="inquiryModal" class="inquiry-modal" style="display:none;">
+    <div class="inquiry-modal-backdrop"></div>
+    <div class="inquiry-modal-content">
+      <div class="inquiry-modal-header">
+        <h2>이 데이터에 대해 설명이 필요하신가요?</h2>
+        <button type="button" class="inquiry-modal-close" id="closeInquiryBtn">&times;</button>
+      </div>
+      
+      <div class="inquiry-context-badge">
+        <span class="context-icon">📊</span>
+        <span id="inquiryContextLabel">현재 분석 결과를 기준으로 담당자가 안내해 드립니다</span>
+      </div>
+      
+      <form id="inquiryForm">
+        <!-- Contact Info -->
+        <div class="inquiry-form-group">
+          <label for="contactPhone">연락받으실 전화번호 <span class="required">*</span></label>
+          <input type="tel" id="contactPhone" name="phone" placeholder="예: 010-0000-0000" required>
+        </div>
+
+        <div class="inquiry-form-group">
+          <label for="contactEmail">이메일 (선택)</label>
+          <input type="email" id="contactEmail" name="email" placeholder="result@example.com">
+        </div>
+
+        <!-- Interest Tags -->
+        <div class="inquiry-form-group">
+          <label>주요 궁금한 점 (중복 선택 가능)</label>
+          <div class="inquiry-checkbox-group">
+            <label class="inquiry-checkbox">
+              <input type="checkbox" name="interest" value="execution_feasibility">
+              <span class="checkmark"></span>
+              실제 광고 집행 가능성과 절차
+            </label>
+            <label class="inquiry-checkbox">
+              <input type="checkbox" name="interest" value="cost_structure">
+              <span class="checkmark"></span>
+              예상 비용 및 과금 구조
+            </label>
+            <label class="inquiry-checkbox">
+              <input type="checkbox" name="interest" value="custom_strategy">
+              <span class="checkmark"></span>
+              우리 병원에 맞는 타겟팅 전략
+            </label>
+          </div>
+        </div>
+
+        <!-- Additional Content (Textarea) -->
+        <div class="inquiry-form-group">
+          <label for="inquiryContent">기타 문의 내용 (선택)</label>
+          <textarea id="inquiryContent" name="content" rows="3" placeholder="추가로 궁금하신 점을 자유롭게 적어주세요."></textarea>
+        </div>
+        
+        <p class="inquiry-notice">
+          남겨주신 정보는 상담 목적으로만 활용되며, <br>
+          담당자가 분석 데이터를 미리 확인 후 연락드립니다.
+        </p>
+        
+        <div class="inquiry-form-actions">
+          <button type="button" class="inquiry-btn-secondary" id="cancelInquiryBtn">취소</button>
+          <button type="submit" class="inquiry-btn-primary">설명 요청하기</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Inquiry Success Modal -->
+  <div id="inquirySuccessModal" class="inquiry-modal" style="display:none;">
+    <div class="inquiry-modal-backdrop"></div>
+    <div class="inquiry-modal-content inquiry-success-content">
+      <div class="inquiry-success-icon">✓</div>
+      <h2>설명 요청이 접수되었습니다</h2>
+      <p class="inquiry-success-desc">
+        현재 보고 계신 분석 결과를 기준으로 <br>
+        담당자가 검토 후 빠르게 연락드리겠습니다.<br>
+        <br>
+        <span style="font-size: 0.9em; color: #888;">접수 번호: <span id="inquirySuccessId"></span></span>
+      </p>
+      
+      <!-- 조건부 Order 전환 CTA (조건 충족 시에만 표시) -->
+      <div id="orderCtaSection" class="order-cta-section" style="display:none;">
+        <p class="order-cta-message">
+          이 분석 결과를 기준으로<br>
+          <strong>실제 집행 가능성에 대한 설명</strong>을 받아볼 수 있습니다.
+        </p>
+        <button type="button" class="inquiry-btn-primary" id="orderNextStepBtn">다음 단계 설명 보기</button>
+      </div>
+      
+      <button type="button" class="inquiry-btn-secondary" id="closeSuccessBtn">닫기</button>
+    </div>
+  </div>
+
+  <!-- Hidden Chart Canvas (추후 복원용) -->
+  <div style="display:none;">
+    <canvas id="mainChart"></canvas>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // -------------------------------------------------------
+      // 1. Data Loading & Initialization
+      // -------------------------------------------------------
+      const storedData = localStorage.getItem('touchadData');
+      
+      // Fallback for direct access without data (Dev Mode)
+      const defaultData = {
+        hospitalName: "체험 병원",
+        resData: [
+          { target: 12500 }, // Total
+          { target: 4500 },  // 30s
+          { target: 8200 }   // Female
+        ]
+      };
+
+      const data = storedData ? JSON.parse(storedData) : defaultData;
+      
+      let baseTotal = 0;
+      let baseAge = 0;
+      let baseGender = 0;
+
+      if (data.dunjugoValues && data.dunjugoValues.length > 0) {
+          baseTotal = data.dunjugoValues[0]?.value || 12500;
+          baseAge = data.dunjugoValues[1]?.value || 4500;
+          baseGender = data.dunjugoValues[2]?.value || 8200;
+      } else if (data.resData && data.resData.length > 0) {
+           baseTotal = data.resData[0]?.dunjugo || data.resData[0]?.target || 12500;
+           baseAge = data.resData[1]?.dunjugo || data.resData[1]?.target || 4500;
+           baseGender = data.resData[2]?.dunjugo || data.resData[2]?.target || 8200;
+      } else {
+           baseTotal = 12500;
+           baseAge = 4500;
+           baseGender = 8200;
+      }
+
+      // UI References
+      const elHospitalName = document.getElementById('hospitalName');
+      const elDate = document.getElementById('currentDate');
+      
+      // KPIs
+      const elValScale = document.getElementById('val-scale');
+      const elValPrecision = document.getElementById('val-precision');
+      const elValRelevance = document.getElementById('val-relevance');
+      
+      // Alerts
+      const elAlertTargetCount = document.getElementById('alert-target-count');
+
+      // Set Metadata
+      elHospitalName.textContent = data.hospitalName || "체험 병원";
+      const today = new Date();
+      elDate.textContent = `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2, '0')}.${String(today.getDate()).padStart(2, '0')} 기준`;
+
+      // Map & Heatmap
+      let map = null;
+      let isMapLoaded = false;
+      const GANGNAM_COORDS = { lat: 37.517316, lng: 127.047466 }; 
+
+      // -------------------------------------------------------
+      // 2. Logic & Rendering
+      // -------------------------------------------------------
+      
+      // Chart 초기화 (숨김 상태지만 추후 복원용으로 유지)
+      let chartInstance = null;
+      const chartCanvas = document.getElementById('mainChart');
+      if (chartCanvas) {
+        const ctx = chartCanvas.getContext('2d');
+        Chart.defaults.font.family = 'SUIT';
+        Chart.defaults.color = '#666';
+        chartInstance = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: ['잠재 환자', '여성 고객', '30대 타겟'],
+            datasets: [{
+              label: '유저 수',
+              data: [0, 0, 0],
+              backgroundColor: [
+                'rgba(0, 0, 0, 0.8)',
+                'rgba(100, 100, 100, 0.6)',
+                'rgba(200, 200, 200, 0.4)'
+              ],
+              borderWidth: 0,
+              borderRadius: 4,
+              barPercentage: 0.6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } }
+          }
+        });
+      }
+
+      function updateDashboard() {
+        // Calculate values (반경 시뮬레이션 삭제로 고정 multiplier 사용)
+        const multiplier = 1.0;
+
+        const currentTotal = Math.round(baseTotal * multiplier);
+        const currentGender = Math.round(baseGender * multiplier); 
+        const currentAge = Math.round(baseAge * multiplier);       
+
+        // Update KPIs
+        animateValue(elValScale, parseInt(elValScale.textContent.replace(/,/g, '') || 0), currentTotal, 500);
+        
+        // Percentages
+        const precision = currentTotal > 0 ? ((currentAge / currentTotal) * 100).toFixed(1) : 0;
+        elValPrecision.textContent = precision;
+
+        const relevance = currentTotal > 0 ? ((currentGender / currentTotal) * 100).toFixed(1) : 0;
+        elValRelevance.textContent = relevance;
+        
+        // Update Alert
+        if(elAlertTargetCount) elAlertTargetCount.textContent = currentTotal.toLocaleString();
+
+        // Update Chart (hidden but maintained)
+        if (chartInstance) {
+          chartInstance.data.datasets[0].data = [currentTotal, currentGender, currentAge];
+          chartInstance.update();
+        }
+      }
+
+      function animateValue(obj, start, end, duration) {
+        if (!obj) return;
+        let startTimestamp = null;
+        const step = (timestamp) => {
+          if (!startTimestamp) startTimestamp = timestamp;
+          const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+          const value = Math.floor(progress * (end - start) + start);
+          obj.textContent = value.toLocaleString();
+          if (progress < 1) {
+            window.requestAnimationFrame(step);
+          }
+        };
+        window.requestAnimationFrame(step);
+      }
+
+      // -------------------------------------------------------
+      // 3. Map Implementation
+      // -------------------------------------------------------
+      function loadKakaoMap() {
+        if (typeof TOUCH_CONFIG === 'undefined' || !TOUCH_CONFIG.KAKAO_API_KEY) {
+          showMapError("지도 데이터를 불러올 수 없습니다.");
+          return;
+        }
+
+        const script = document.createElement("script");
+        script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${TOUCH_CONFIG.KAKAO_API_KEY}&libraries=services&autoload=false`;
+        
+        script.onload = () => {
+          kakao.maps.load(() => {
+            initMap();
+          });
+        };
+        
+        script.onerror = () => {
+          showMapError("지도 연결에 실패했습니다.");
+        };
+
+        document.head.appendChild(script);
+      }
+
+      function showMapError(msg) {
+        const container = document.getElementById('kakaoMap');
+        if (container) {
+          container.innerHTML = `
+            <div style="display:flex; flex-direction:column; justify-content:center; align-items:center; height:100%; background:#f5f5f5; color:#999; text-align:center;">
+              <div style="font-size:24px; margin-bottom:10px;">⚠️</div>
+              <div style="font-size:14px; font-weight:500;">${msg}</div>
+            </div>
+          `;
+        }
+      }
+
+      function initMap() {
+        const container = document.getElementById('kakaoMap');
+        const options = {
+          center: new kakao.maps.LatLng(GANGNAM_COORDS.lat, GANGNAM_COORDS.lng),
+          level: 4
+        };
+
+        map = new kakao.maps.Map(container, options);
+        isMapLoaded = true;
+
+        const storedAddress = localStorage.getItem('address-base');
+        
+        if (storedAddress) {
+          const geocoder = new kakao.maps.services.Geocoder();
+          geocoder.addressSearch(storedAddress, function(result, status) {
+            if (status === kakao.maps.services.Status.OK) {
+              const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+              map.setCenter(coords);
+              
+              new kakao.maps.Marker({
+                map: map,
+                position: coords
+              });
+            }
+          });
+        } else {
+             new kakao.maps.Marker({
+                map: map,
+                position: new kakao.maps.LatLng(GANGNAM_COORDS.lat, GANGNAM_COORDS.lng)
+              });
+        }
+      }
+
+      // -------------------------------------------------------
+      // 4. Initialization
+      // -------------------------------------------------------
+      
+      updateDashboard();
+      setTimeout(loadKakaoMap, 100);
+
+      // -------------------------------------------------------
+      // 5. AI Insight Rendering
+      // -------------------------------------------------------
+      function renderAiInsight() {
+        const insightSection = document.getElementById('aiInsightSection');
+        const insightText = document.getElementById('aiInsightText');
+        
+        if (!insightSection || !insightText) return;
+
+        const storedData = localStorage.getItem('touchadData');
+        if (!storedData) {
+          insightSection.style.display = 'none';
+          return;
+        }
+
+        try {
+          const data = JSON.parse(storedData);
+          const gptInsight = data.gptInsight;
+
+          if (gptInsight && gptInsight.trim()) {
+            insightText.textContent = gptInsight;
+            insightSection.style.display = 'block';
+            console.log('[AI Insight] Rendered successfully');
+          } else {
+            insightSection.style.display = 'none';
+            console.log('[AI Insight] No insight data, hiding section');
+          }
+        } catch (e) {
+          console.error('[AI Insight] Failed to render:', e);
+          insightSection.style.display = 'none';
+        }
+      }
+
+      renderAiInsight();
+
+      // -------------------------------------------------------
+      // 6. Subscription Overlay Interactions
+      // -------------------------------------------------------
+      const kakaoLoginBtn = document.getElementById('kakaoLoginBtn');
+
+      kakaoLoginBtn?.addEventListener('click', () => {
+        // 카카오 로그인 연동 (추후 구현)
+        alert('카카오 로그인 기능은 준비 중입니다.\n곧 서비스될 예정입니다!');
+      });
+
+      // Contextual Inquiry UX is handled by external module (inquiry.js)
+
+    });
+  </script>
+
+  <!-- Contextual Inquiry JS Module -->
+  <script src="../assets/js/inquiry.js"></script>
+  <script>
+    // Initialize Inquiry Module with dashboard data
+    document.addEventListener('DOMContentLoaded', () => {
+      // Wait for dashboard data to be ready
+      setTimeout(() => {
+        const storedData = localStorage.getItem('touchadData');
+        const data = storedData ? JSON.parse(storedData) : {};
+        
+        let baseTotal = 12500, baseAge = 4500, baseGender = 8200;
+        
+        if (data.dunjugoValues && data.dunjugoValues.length > 0) {
+          baseTotal = data.dunjugoValues[0]?.value || 12500;
+          baseAge = data.dunjugoValues[1]?.value || 4500;
+          baseGender = data.dunjugoValues[2]?.value || 8200;
+        } else if (data.resData && data.resData.length > 0) {
+          baseTotal = data.resData[0]?.dunjugo || data.resData[0]?.target || 12500;
+          baseAge = data.resData[1]?.dunjugo || data.resData[1]?.target || 4500;
+          baseGender = data.resData[2]?.dunjugo || data.resData[2]?.target || 8200;
+        }
+        
+        if (window.InquiryModule) {
+          window.InquiryModule.init({ 
+            baseTotal, 
+            baseAge, 
+            baseGender,
+            source_page: 'newresult.html' // DB source_type 동기화용
+          });
+        }
+      }, 100);
+    });
+  </script>
+</body>
+</html>

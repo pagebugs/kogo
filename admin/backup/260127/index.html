@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TouchAd 관리자 - 대시보드</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="./assets/css/admin.css">
+    <!-- SUIT Font -->
+    <link href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT/fonts/variable/woff2/SUIT-Variable.css" rel="stylesheet">
+</head>
+<body class="admin-body">
+
+    <!-- Header -->
+    <header class="admin-header">
+        <div class="admin-logo">TouchAd 관리자</div>
+        <nav class="admin-nav">
+            <a href="index.html" class="active">대시보드</a>
+            <a href="inquiry_list.html">문의 관리</a>
+            <a href="order_list.html">주문 관리</a>
+        </nav>
+        <div class="admin-user-info text-small">
+            관리자님
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="admin-container">
+        
+        <!-- 🎯 세일즈 퍼널 KPI -->
+        <h2 class="section-title" style="text-align: left; margin-bottom: 16px; font-size: 1.1rem; color: #666;">📊 세일즈 퍼널</h2>
+        <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 32px;">
+            <div class="kpi-card" onclick="location.href='inquiry_list.html?status=new'" style="cursor:pointer;">
+                <div class="kpi-title">신규 문의</div>
+                <div class="kpi-value" id="kpiNew">-</div>
+                <div class="kpi-trend text-small">첫 컨택 필요</div>
+            </div>
+            <div class="kpi-card" onclick="location.href='inquiry_list.html?status=contacted'" style="cursor:pointer;">
+                <div class="kpi-title">컨택 완료</div>
+                <div class="kpi-value" id="kpiContacted">-</div>
+                <div class="kpi-trend text-small">팔로업 중</div>
+            </div>
+            <div class="kpi-card card-emphasis" onclick="location.href='inquiry_list.html?status=qualified'" style="cursor:pointer;">
+                <div class="kpi-title">⭐ 영업 준비</div>
+                <div class="kpi-value" id="kpiQualified">-</div>
+                <div class="kpi-trend text-small">주문 생성 가능</div>
+            </div>
+            <div class="kpi-card" onclick="location.href='order_list.html?status=DONE'" style="cursor:pointer;">
+                <div class="kpi-title">완료 주문</div>
+                <div class="kpi-value" id="kpiOrderDone">-</div>
+                <div class="kpi-trend text-small" id="kpiOrderAmount">매출 집계</div>
+            </div>
+        </div>
+
+        <!-- 📈 트래픽 인사이트 -->
+        <h2 class="section-title" style="text-align: left; margin-bottom: 16px; font-size: 1.1rem; color: #666;">📈 트래픽 인사이트</h2>
+        <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 32px;">
+            <div class="kpi-card" style="background: #fafafa;">
+                <div class="kpi-title">오늘 세션</div>
+                <div class="kpi-value" id="kpiSessionsToday">-</div>
+                <div class="kpi-trend text-small">방문자 수</div>
+            </div>
+            <div class="kpi-card" style="background: #fafafa; border-left: 3px solid #ff9800;">
+                <div class="kpi-title">다회 시도 세션</div>
+                <div class="kpi-value" id="kpiHighEngagement">-</div>
+                <div class="kpi-trend text-small">시뮬레이션 2회 이상</div>
+            </div>
+            <div class="kpi-card" style="background: #fafafa;">
+                <div class="kpi-title">평균 시도 횟수</div>
+                <div class="kpi-value" id="kpiAvgSims">-</div>
+                <div class="kpi-trend text-small">세션당 시뮬레이션</div>
+            </div>
+        </div>
+
+        <h2 class="section-title" style="text-align: left; margin-bottom: 20px; font-size: 1.25rem;">최근 문의</h2>
+        
+        <!-- Recent Inquiry Table (동적 로드) -->
+        <div class="data-table-wrapper mb-8">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 100px;">상태</th>
+                        <th style="width: 140px;">시간</th>
+                        <th>잠재 고객 수</th>
+                        <th>유입 경로</th>
+                        <th>병원명</th>
+                        <th style="width: 80px;">액션</th>
+                    </tr>
+                </thead>
+                <tbody id="recentInquiryTable">
+                    <tr><td colspan="6" style="text-align:center; padding:30px;">로딩 중...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h2 class="section-title" style="text-align: left; margin-bottom: 20px; font-size: 1.25rem;">최근 주문</h2>
+        
+        <!-- Recent Order Preview (동적 로드) -->
+        <div class="data-table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>상태</th>
+                        <th>주문 ID</th>
+                        <th>금액</th>
+                        <th>연결된 문의</th>
+                        <th>생성일</th>
+                    </tr>
+                </thead>
+                <tbody id="recentOrderTable">
+                    <tr><td colspan="5" style="text-align:center; padding:30px;">로딩 중...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+
+    <!-- Admin API Module -->
+    <script src="./assets/js/admin-api.js"></script>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        // 세일즈 퍼널 통계 로드
+        try {
+            const stats = await AdminAPI.stats.get();
+            
+            document.getElementById('kpiNew').textContent = stats.inquiry.new_count || 0;
+            document.getElementById('kpiContacted').textContent = stats.inquiry.contacted_count || 0;
+            document.getElementById('kpiQualified').textContent = stats.inquiry.qualified_count || 0;
+            document.getElementById('kpiOrderDone').textContent = stats.order.done_count || 0;
+            
+            // 완료 주문 금액 표시
+            const completedAmount = stats.order.completed_amount || 0;
+            if (completedAmount > 0) {
+                document.getElementById('kpiOrderAmount').textContent = 
+                    AdminAPI.utils.formatNumber(completedAmount) + '원';
+            }
+        } catch (err) {
+            console.error('Stats load failed:', err);
+        }
+
+        // 트래픽 인사이트 로드
+        try {
+            const stats = await AdminAPI.stats.get();
+            document.getElementById('kpiSessionsToday').textContent = stats.today?.sessions_today || 0;
+        } catch (err) {
+            console.warn('Today stats failed:', err);
+        }
+
+        try {
+            const engagementStats = await AdminAPI.stats.getEngagement();
+            document.getElementById('kpiHighEngagement').textContent = engagementStats.high_engagement_count || 0;
+            document.getElementById('kpiAvgSims').textContent = 
+                (engagementStats.avg_simulations_per_session || 0).toFixed(1);
+        } catch (err) {
+            console.warn('Engagement stats load failed:', err);
+            document.getElementById('kpiHighEngagement').textContent = '-';
+            document.getElementById('kpiAvgSims').textContent = '-';
+        }
+
+        // 최근 Inquiry 로드
+        try {
+            const data = await AdminAPI.inquiries.list({ limit: 5 });
+            renderRecentInquiries(data.inquiries);
+        } catch (err) {
+            document.getElementById('recentInquiryTable').innerHTML = 
+                `<tr><td colspan="6" style="text-align:center; color:#d32f2f;">오류: ${err.message}</td></tr>`;
+        }
+
+        // 최근 Order 로드
+        try {
+            const data = await AdminAPI.orders.list({ limit: 5 });
+            renderRecentOrders(data.orders);
+        } catch (err) {
+            document.getElementById('recentOrderTable').innerHTML = 
+                `<tr><td colspan="5" style="text-align:center; color:#d32f2f;">오류: ${err.message}</td></tr>`;
+        }
+
+        function renderRecentInquiries(inquiries) {
+            const tbody = document.getElementById('recentInquiryTable');
+            
+            if (!inquiries || inquiries.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#999;">문의가 없습니다</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = inquiries.map(inq => {
+                const total = inq.context_snapshot?.resData_snapshot?.total || '-';
+                const hospitalName = inq.context_snapshot?.hospital_name || '(미입력)';
+                const isHighValue = typeof total === 'number' && total >= 50000;
+
+                return `
+                <tr>
+                    <td>${AdminAPI.utils.statusBadge(inq.status)}</td>
+                    <td class="text-small">${AdminAPI.utils.formatDate(inq.created_at)}</td>
+                    <td><span class="${isHighValue ? 'text-value-high' : ''}">${AdminAPI.utils.formatNumber(total)}</span></td>
+                    <td class="text-small text-muted">${inq.source_type || '-'} / ${inq.source_page || '-'}</td>
+                    <td>${hospitalName}</td>
+                    <td><a href="inquiry_detail.html?id=${inq.inquiry_id}" class="btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;">상세</a></td>
+                </tr>
+                `;
+            }).join('');
+        }
+
+        function renderRecentOrders(orders) {
+            const tbody = document.getElementById('recentOrderTable');
+            
+            if (!orders || orders.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#999;">주문이 없습니다</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = orders.map(order => {
+                return `
+                <tr>
+                    <td>${AdminAPI.utils.statusBadge(order.status)}</td>
+                    <td style="font-weight:600;">${order.order_id}</td>
+                    <td>${order.amount ? AdminAPI.utils.formatNumber(order.amount) + ' 원' : '-'}</td>
+                    <td>${order.inquiry_id || '-'}</td>
+                    <td class="text-small">${AdminAPI.utils.formatDate(order.created_at).split(' ')[0]}</td>
+                </tr>
+                `;
+            }).join('');
+        }
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kogo Admin - 회원 관리</title>
+    <link rel="stylesheet" href="../../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/admin.css">
+    <!-- SUIT Font -->
+    <link href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT/fonts/variable/woff2/SUIT-Variable.css" rel="stylesheet">
+</head>
+<body class="admin-body">
+
+    <!-- 1depth: Global Navigation Bar -->
+    <nav class="global-nav">
+        <div class="global-nav-logo">Kogo</div>
+        <div class="global-nav-menu">
+            <a href="../index.html">대시보드</a>
+            <div class="dropdown">
+                <a href="#">서비스 관리 ▾</a>
+                <div class="dropdown-content">
+                    <a href="../touchad/index.html">터치애드</a>
+                    <a href="#" style="color:#666;">코고케어 (예정)</a>
+                    <a href="#" style="color:#666;">조합원 관리 (예정)</a>
+                </div>
+            </div>
+            <a href="index.html" class="active">회원 관리</a>
+            <a href="#" style="color:#666;">빌링</a>
+            <a href="#" style="color:#666;">설정</a>
+        </div>
+        <div class="global-nav-user">관리자님</div>
+    </nav>
+
+    <main class="admin-container">
+        <div class="admin-header-flex" style="margin-bottom: 24px;">
+            <h1 class="admin-page-title" style="font-size: 1.75rem; font-weight: 700; margin-bottom: 4px;">회원 관리</h1>
+            <p style="color: #666; font-size: 0.9rem;">전체 서비스 등록 회원 및 조직(조합사) 배정 관리</p>
+        </div>
+
+        <!-- 필터 영역 -->
+        <div class="filter-bar card">
+            <div class="filter-group">
+                <label>회원 유형</label>
+                <select id="filterMemberType">
+                    <option value="">전체 조회</option>
+                    <option value="ADMIN">관리자</option>
+                    <option value="COOP_MEMBER">조합회원</option>
+                    <option value="COOP_ASSOCIATE">준회원</option>
+                    <option value="PARTNER">파트너</option>
+                    <option value="GENERAL">일반</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>계정 상태</label>
+                <select id="filterStatus">
+                    <option value="">전체 상태</option>
+                    <option value="active">활성</option>
+                    <option value="pending">대기</option>
+                    <option value="inactive">비활성</option>
+                </select>
+            </div>
+            <button class="btn-primary" id="btnSearch" style="padding: 10px 24px; font-size: 0.9rem;">검색 필터 적용</button>
+        </div>
+
+        <!-- 데이터 테이블 -->
+        <div class="data-table-wrapper card">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">ID</th>
+                        <th style="width: 120px;">유형</th>
+                        <th>이름 / 이메일</th>
+                        <th>소속 조직 / 직책</th>
+                        <th style="width: 100px;">상태</th>
+                        <th style="width: 150px;">가입일</th>
+                        <th style="width: 80px;">액션</th>
+                    </tr>
+                </thead>
+                <tbody id="memberTableBody">
+                    <tr><td colspan="7" style="text-align:center; padding:60px; color: #999;">데이터를 불러오는 중...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 페이지네이션 (단순 구현) -->
+        <div class="pagination" id="pagination" style="margin-top: 24px;"></div>
+    </main>
+
+    <script src="../assets/js/admin-api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            loadMembers();
+
+            document.getElementById('btnSearch').addEventListener('click', () => {
+                loadMembers();
+            });
+        });
+
+        async function loadMembers() {
+            const tableBody = document.getElementById('memberTableBody');
+            const type = document.getElementById('filterMemberType').value;
+            const status = document.getElementById('filterStatus').value;
+
+            try {
+                const data = await AdminAPI.users.list({ 
+                    member_type: type || null, 
+                    status: status || null 
+                });
+
+                renderMembers(data.users);
+            } catch (err) {
+                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#d32f2f; padding:40px;">⚠️ 오류: ${err.message}</td></tr>`;
+            }
+        }
+
+        function renderMembers(users) {
+            const tableBody = document.getElementById('memberTableBody');
+            
+            if (!users || users.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:80px; color:#999;">검색 결과와 일치하는 회원이 없습니다.</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = users.map(user => {
+                const orgInfo = user.org_name 
+                    ? `<div style="font-weight:600; color:#333;">${user.org_name}</div><div class="text-small text-muted">${user.position || '-'}</div>` 
+                    : `<div style="color:#999;">${user.company || '소속 없음'}</div>`;
+                
+                const nameDisplay = `<div style="font-weight:600; color:#1a1a1a;">${user.name || '(이름없음)'}</div><div class="text-small text-muted">${user.email}</div>`;
+                
+                return `
+                    <tr>
+                        <td class="text-muted">${user.id}</td>
+                        <td>${AdminAPI.utils.statusBadge(user.member_type)}</td>
+                        <td>${nameDisplay}</td>
+                        <td>${orgInfo}</td>
+                        <td>${AdminAPI.utils.statusBadge(user.status)}</td>
+                        <td class="text-small text-muted">${AdminAPI.utils.formatDate(user.created_at)}</td>
+                        <td>
+                            <a href="detail.html?id=${user.id}" class="btn-secondary" style="padding:4px 10px; font-size:0.8rem;">관리</a>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+    </script>
+</body>
+</html>
+

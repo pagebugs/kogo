@@ -83,8 +83,14 @@ body {
   background: var(--color-white);
   line-height: var(--lh-base);
   
-  /* WINDOW SCROLL IS DISABLED FOR SNAP CONTAINER */
-  overflow: hidden; /* Prevent double scrollbar */
+  /* Allow normal page scrolling by default. */
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* Only snap-scroll pages should lock window scroll. */
+body.snap-scroll {
+  overflow: hidden;
 }
 
 /* 반전 상태 (Theme Invert / Dark Mode) */

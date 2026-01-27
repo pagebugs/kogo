@@ -46,26 +46,31 @@ function encrypt(plainText) {
 /**
  * AES-256-CBC 암호문을 복호화
  * @param {string} cipherText - IV:암호문 형태의 Base64 인코딩 문자열
- * @returns {string} - 복호화된 평문
+ * @returns {string} - 복호화된 평문 (유효하지 않은 형식이면 원본 반환)
  */
 function decrypt(cipherText) {
     if (!cipherText) return null;
     
     const parts = cipherText.split(':');
     if (parts.length !== 2) {
-        console.warn('[Crypto] Invalid cipher text format');
-        return null;
+        // 암호화되지 않은 평문이거나 잘못된 형식 → 원본 반환
+        return cipherText;
     }
     
-    const iv = Buffer.from(parts[0], 'base64');
-    const encrypted = parts[1];
-    
-    const decipher = crypto.createDecipheriv(ALGORITHM, KEY, iv);
-    
-    let decrypted = decipher.update(encrypted, 'base64', 'utf8');
-    decrypted += decipher.final('utf8');
-    
-    return decrypted;
+    try {
+        const iv = Buffer.from(parts[0], 'base64');
+        const encrypted = parts[1];
+        
+        const decipher = crypto.createDecipheriv(ALGORITHM, KEY, iv);
+        
+        let decrypted = decipher.update(encrypted, 'base64', 'utf8');
+        decrypted += decipher.final('utf8');
+        
+        return decrypted;
+    } catch (err) {
+        // 복호화 실패 시 원본 반환 (이미 평문일 수 있음)
+        return cipherText;
+    }
 }
 
 /**

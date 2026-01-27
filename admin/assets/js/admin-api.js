@@ -140,6 +140,75 @@ const AdminAPI = (function() {
          */
         async get() {
             return apiCall('GET', '/api/admin/stats');
+        },
+
+        /**
+         * 관심도(Engagement) 통계 조회
+         * - 세션당 평균 시뮬레이션 횟수
+         * - 높은 관심도 세션 수 (2회 이상)
+         */
+        async getEngagement() {
+            return apiCall('GET', '/api/admin/stats/engagement');
+        }
+    };
+
+    // =========================================================
+    // User (Member) API
+    // =========================================================
+    const users = {
+        /**
+         * 회원 리스트 조회
+         * @param {Object} filters - { member_type, status, organization_id, page, limit }
+         */
+        async list(filters = {}) {
+            const params = new URLSearchParams();
+            if (filters.member_type) params.append('member_type', filters.member_type);
+            if (filters.status) params.append('status', filters.status);
+            if (filters.organization_id) params.append('organization_id', filters.organization_id);
+            if (filters.page) params.append('page', filters.page);
+            if (filters.limit) params.append('limit', filters.limit);
+
+            const queryString = params.toString();
+            const endpoint = `/api/admin/users${queryString ? '?' + queryString : ''}`;
+            
+            return apiCall('GET', endpoint);
+        },
+
+        /**
+         * 회원 상세 조회
+         * @param {number} userId
+         */
+        async view(userId) {
+            return apiCall('GET', `/api/admin/users/${userId}`);
+        },
+
+        /**
+         * 회원 정보 업데이트 (유형, 상태, 승인 등)
+         * @param {number} userId
+         * @param {Object} data
+         */
+        async update(userId, data) {
+            return apiCall('PATCH', `/api/admin/users/${userId}`, data);
+        }
+    };
+
+    // =========================================================
+    // Organization API
+    // =========================================================
+    const organizations = {
+        /**
+         * 조직(조합사) 리스트 조회
+         * @param {Object} filters - { org_type, status }
+         */
+        async list(filters = {}) {
+            const params = new URLSearchParams();
+            if (filters.org_type) params.append('org_type', filters.org_type);
+            if (filters.status) params.append('status', filters.status);
+
+            const queryString = params.toString();
+            const endpoint = `/api/admin/organizations${queryString ? '?' + queryString : ''}`;
+            
+            return apiCall('GET', endpoint);
         }
     };
 
@@ -179,7 +248,13 @@ const AdminAPI = (function() {
                 'ORDERED': '<span class="badge badge-ordered">ORDERED</span>',
                 'RUNNING': '<span class="badge badge-running">RUNNING</span>',
                 'DONE': '<span class="badge badge-done">DONE</span>',
-                'CANCELLED': '<span class="badge badge-cancelled">CANCELLED</span>'
+                'CANCELLED': '<span class="badge badge-cancelled">CANCELLED</span>',
+                // 회원 유형 배지
+                'ADMIN': '<span class="badge badge-admin">ADMIN</span>',
+                'COOP_MEMBER': '<span class="badge badge-coop">조합회원</span>',
+                'COOP_ASSOCIATE': '<span class="badge badge-coop-sub">준회원</span>',
+                'PARTNER': '<span class="badge badge-partner">PARTNER</span>',
+                'GENERAL': '<span class="badge badge-general">일반</span>'
             };
             return badges[status] || `<span class="badge">${status}</span>`;
         }
@@ -189,6 +264,8 @@ const AdminAPI = (function() {
     return {
         inquiries,
         orders,
+        users,
+        organizations,
         stats,
         utils
     };
