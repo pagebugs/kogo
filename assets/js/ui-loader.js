@@ -2,8 +2,7 @@
    UI Loader - Load Header and Footer dynamically
 ========================================================= */
 
-document.addEventListener("DOMContentLoaded", function() {
-  
+function initUiLoader() {
   const headerPlaceholder = document.getElementById('include-header');
   const footerPlaceholder = document.getElementById('include-footer');
 
@@ -24,6 +23,8 @@ document.addEventListener("DOMContentLoaded", function() {
           // script 태그의 순서를 보장해야 함. (여기서는 순서 보장 가정)
           console.warn("initGNB function not found. Ensure gnb.js is loaded.");
         }
+        // Signal that the header (and GNB init attempt) is complete.
+        document.dispatchEvent(new CustomEvent("header:loaded"));
       })
       .catch(err => {
         console.error("Error loading header:", err);
@@ -43,4 +44,11 @@ document.addEventListener("DOMContentLoaded", function() {
       })
       .catch(err => console.error("Error loading footer:", err));
   }
-});
+}
+
+// Start as early as possible, but still safe if this script ever moves to <head>.
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initUiLoader, { once: true });
+} else {
+  initUiLoader();
+}

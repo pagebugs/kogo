@@ -1,0 +1,79 @@
+@layer components {
+  .hero-section {
+    @apply relative isolate overflow-hidden px-6 pt-28 pb-24 sm:pt-36 sm:pb-32 lg:px-8;
+  }
+
+  .hero-blob-top {
+    @apply pointer-events-none absolute inset-x-0 -top-32 -z-10 transform-gpu blur-3xl sm:-top-52;
+  }
+
+  .hero-blob-top-shape {
+    @apply mx-auto h-64 w-[40rem] max-w-none bg-white/10 opacity-70 sm:h-80 sm:w-[60rem];
+  }
+
+  .hero-inner {
+    @apply mx-auto flex w-full max-w-5xl flex-col items-center text-center;
+  }
+
+  .hero-eyebrow {
+    @apply inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-[11px] font-semibold uppercase text-white/70 sm:text-xs;
+    letter-spacing: 0.18em;
+  }
+
+  .hero-title {
+    @apply mx-auto mt-8 max-w-4xl text-balance text-4xl font-semibold tracking-tight text-white sm:mt-10 sm:text-6xl lg:text-7xl;
+    line-height: 1.05;
+  }
+
+  .hero-title-caret {
+    display: inline-block;
+    margin-left: 0.08em;
+    color: rgb(255 255 255 / 0.9);
+    animation: hero-caret-blink 1s steps(1, end) infinite;
+  }
+
+  @keyframes hero-caret-blink {
+    0%,
+    49% {
+      opacity: 1;
+    }
+    50%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  .hero-subtitle {
+    @apply mt-6 max-w-2xl text-pretty text-base leading-7 text-white/75 sm:mt-7 sm:text-lg sm:leading-8;
+  }
+
+  .hero-cta-row {
+    @apply mt-12 flex w-full max-w-xl flex-col items-stretch justify-center gap-3 sm:mt-14 sm:w-auto sm:max-w-none sm:flex-row sm:items-center sm:gap-4;
+  }
+
+  .hero-btn-secondary {
+    @apply inline-flex items-center justify-center rounded-xl border border-white/25 bg-white/5 px-6 py-3 text-sm font-semibold text-white transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white;
+  }
+
+  .hero-btn-secondary:hover {
+    border-color: rgb(255 255 255 / 0.4);
+    background-color: rgb(255 255 255 / 0.1);
+  }
+
+  .hero-btn-primary {
+    @apply inline-flex items-center justify-center rounded-xl bg-white px-6 py-3 text-sm font-semibold text-black shadow-lg shadow-white/10 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white;
+  }
+
+  .hero-btn-primary:hover {
+    transform: translateY(-1px);
+    background-color: rgb(255 255 255 / 0.9);
+  }
+
+  .hero-blob-bottom {
+    @apply pointer-events-none absolute inset-x-0 bottom-[-8rem] -z-10 transform-gpu blur-3xl sm:bottom-[-12rem];
+  }
+
+  .hero-blob-bottom-shape {
+    @apply mx-auto h-72 w-[44rem] max-w-none bg-white/10 opacity-60 sm:h-[22rem] sm:w-[70rem];
+  }
+}

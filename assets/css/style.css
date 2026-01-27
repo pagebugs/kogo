@@ -2,6 +2,7 @@
    TOUCHAD — VALUE PROPOSITION PAGE
    Grid-based responsive layout (1920 PC / 720 Mobile)
    BW Grayscale design with SUIT font
+   Tailwind는 “표현”, 기존 CSS는 “구조”로 역할 분리
  ========================================================= */
 
 /* @import url('https://cdn.jsdelivr.net/gh/sun-typeface/SUIT/fonts/variable/woff2/SUIT-Variable.woff2'); */
@@ -83,8 +84,14 @@ body {
   background: var(--color-white);
   line-height: var(--lh-base);
   
-  /* WINDOW SCROLL IS DISABLED FOR SNAP CONTAINER */
-  overflow: hidden; /* Prevent double scrollbar */
+  /* Allow normal page scrolling by default. */
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* Only snap-scroll pages should lock window scroll. */
+body.snap-scroll {
+  overflow: hidden;
 }
 
 /* 반전 상태 (Theme Invert / Dark Mode) */
@@ -109,7 +116,7 @@ body.theme-invert {
 }
 
 /* Scroll Snap Alignment for Sections */
-section, .section, .hero, .partners, .benefit, .simulator {
+section, .section, .hero, .hero-section, .partners, .benefit, .simulator {
   scroll-snap-align: start;
   scroll-snap-stop: always;
 }

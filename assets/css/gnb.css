@@ -42,6 +42,14 @@
 /* =========================================================
    HEADER
 ========================================================= */
+body.has-gnb {
+  padding-top: var(--nav-height);
+}
+
+#include-header {
+  min-height: var(--nav-height);
+}
+
 .header {
   position: fixed; /* Changed from sticky to fixed for smart behavior */
   top: 0;
@@ -122,6 +130,8 @@ body.has-mega-open::after {
   position: absolute; margin-top: 0; top: var(--nav-height); left: 0; width: 100%;
   padding: var(--panel-padding-y) 0; background: var(--color-bg);
   border-bottom: 1px solid var(--color-border); box-shadow: var(--panel-shadow);
+  z-index: var(--z-dropdown);
+  transform-origin: top center;
   opacity: 0; transform: translateY(10px); pointer-events: none;
   transition: opacity 0.35s ease, transform 0.35s ease;
 }

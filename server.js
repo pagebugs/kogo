@@ -11,6 +11,9 @@ const PORT = 3000;
 app.use(cors());
 app.use(bodyParser.json());
 
+// 정적 파일 서빙 (프로젝트 루트 기준)
+app.use(express.static(__dirname));
+
 // Database Config
 const dbConfig = {
     host: 'localhost',
