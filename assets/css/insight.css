@@ -9,6 +9,489 @@
   padding-bottom: var(--space-16);
 }
 
+/* =========================================================
+   STAGE 1: KPI Hero Section (Immediate Numeric Impact)
+   목적: 숫자로 직관을 깨는 구간 - "Ah-ha" Moment
+ ========================================================= */
+.stage-kpi-hero {
+  margin-bottom: var(--space-12);
+}
+
+.kpi-hero-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border-gray);
+}
+
+.kpi-time-context {
+  font-size: var(--font-sm);
+  color: var(--color-medium-gray);
+}
+
+.kpi-hero-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-6);
+}
+
+/* Data Source Note (KPI 주석 레벨) */
+.kpi-source-note {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  font-size: var(--font-sm);
+  color: var(--color-medium-gray);
+}
+
+.kpi-source-icon {
+  font-size: var(--font-base);
+}
+
+.kpi-source-badge {
+  background: var(--color-bg-gray);
+  color: var(--color-dark-gray);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.kpi-hero-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-border-gray);
+  border-radius: var(--border-radius);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  min-height: 180px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.kpi-hero-card:hover {
+  border-color: var(--color-black);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.kpi-hero-card.primary {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  border-color: var(--color-black);
+  color: var(--color-white);
+}
+
+.kpi-hero-card.info {
+  background: var(--color-bg-gray);
+  border-style: dashed;
+}
+
+.kpi-question {
+  font-size: var(--font-sm);
+  font-weight: 500;
+  color: var(--color-medium-gray);
+  line-height: 1.5;
+  margin-bottom: var(--space-4);
+}
+
+.kpi-hero-card.primary .kpi-question {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.kpi-hero-value-group {
+  margin-top: auto;
+  margin-bottom: var(--space-2);
+}
+
+.kpi-hero-value {
+  font-size: var(--font-3xl);
+  font-weight: 700;
+  color: var(--color-black);
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+.kpi-hero-card.primary .kpi-hero-value {
+  color: var(--color-white);
+}
+
+.kpi-hero-unit {
+  font-size: var(--font-lg);
+  color: var(--color-medium-gray);
+  margin-left: 4px;
+  font-weight: 500;
+}
+
+.kpi-hero-card.primary .kpi-hero-unit {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.kpi-hero-subtext {
+  font-size: var(--font-xs);
+  color: var(--color-light-gray);
+  margin-top: var(--space-2);
+}
+
+.kpi-hero-card.primary .kpi-hero-subtext {
+  color: oklch(86% 0.18 95);
+}
+
+/* =========================================================
+   STAGE 2: Map Evidence Section (공간적 실재감)
+   목적: Map은 '확인용 UI'가 아니라 '증거물'
+ ========================================================= */
+.stage-map-evidence {
+  margin-bottom: var(--space-12);
+}
+
+.map-evidence-header {
+  margin-bottom: var(--space-6);
+}
+
+.map-evidence-title {
+  font-size: var(--font-lg);
+  font-weight: 700;
+  margin-bottom: var(--space-2);
+}
+
+.map-evidence-desc {
+  font-size: var(--font-base);
+  color: var(--color-dark-gray);
+  margin: 0;
+}
+
+.map-evidence-desc strong {
+  color: var(--color-black);
+  font-weight: 600;
+}
+
+/* =========================================================
+   STAGE 2: Situation Framing (상황 규정)
+   목적: '숫자를 그냥 두면 안 되는 상태'로 규정
+ ========================================================= */
+.stage-situation {
+  margin-bottom: var(--space-12);
+}
+
+.situation-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-border-gray);
+  border-radius: var(--border-radius);
+  padding: var(--space-8) var(--space-10);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.situation-line {
+  font-size: var(--font-lg);
+  color: var(--color-dark-gray);
+  line-height: 1.7;
+  margin: 0;
+  padding-left: var(--space-4);
+  border-left: 3px solid transparent;
+}
+
+.situation-line strong {
+  color: var(--color-black);
+  font-weight: 700;
+}
+
+/* 문장 ① 상태 규정 */
+.situation-state {
+  border-left-color: var(--color-medium-gray);
+}
+
+/* 문장 ② 방치 시 결과 (Silent Risk) */
+.situation-risk {
+  border-left-color: #ff6b6b;
+}
+
+.situation-risk strong {
+  color: #d63031;
+}
+
+/* 문장 ③ 사용자 연결 (Opportunity) */
+.situation-opportunity {
+  border-left-color: oklch(86% 0.18 95);
+}
+
+.situation-opportunity strong {
+  color: var(--color-black);
+}
+
+@media (max-width: 720px) {
+  .situation-card {
+    padding: var(--space-6);
+  }
+  
+  .situation-line {
+    font-size: var(--font-base);
+  }
+}
+
+/* =========================================================
+   STAGE 4: GPT Insight (Strategic Framing)
+   구조: ① 현재 상태 진단 ② 방치 결과 ③ 고려 방향
+ ========================================================= */
+.stage-gpt-insight {
+  margin-bottom: var(--space-12);
+}
+
+.gpt-insight-card {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  border-radius: var(--border-radius);
+  padding: var(--space-8);
+  color: var(--color-white);
+  position: relative;
+  overflow: hidden;
+}
+
+.gpt-insight-card::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, oklch(86% 0.18 95 / 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.gpt-insight-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.gpt-insight-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.gpt-insight-title {
+  font-size: var(--font-lg);
+  font-weight: 600;
+  margin: 0;
+  color: var(--color-white);
+}
+
+/* 대화형 단일 박스 스타일 */
+.gpt-insight-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.gpt-insight-text {
+  font-size: var(--font-base);
+  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+.gpt-insight-text strong {
+  color: oklch(86% 0.18 95);
+  font-weight: 600;
+}
+
+/* =========================================================
+   STAGE 5: Single CTA (Low-friction Action)
+   목적: "구매"가 아니라 "이해 요청"
+ ========================================================= */
+.stage-single-cta {
+  margin-bottom: var(--space-12);
+}
+
+.single-cta-card {
+  background: var(--color-bg-gray);
+  border-radius: var(--border-radius);
+  padding: var(--space-10);
+  text-align: center;
+}
+
+.single-cta-message {
+  font-size: var(--font-lg);
+  color: var(--color-dark-gray);
+  line-height: 1.6;
+  margin: 0 0 var(--space-6);
+}
+
+.single-cta-message strong {
+  color: var(--color-black);
+}
+
+.single-cta-btn {
+  display: inline-block;
+  background: var(--color-black);
+  color: var(--color-white);
+  border: none;
+  padding: var(--space-4) var(--space-10);
+  border-radius: var(--border-radius);
+  font-size: var(--font-md);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.single-cta-btn:hover {
+  background: oklch(30% 0.02 0);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.single-cta-note {
+  font-size: var(--font-sm);
+  color: var(--color-light-gray);
+  margin: var(--space-4) 0 0;
+}
+
+.single-cta-note strong {
+  color: var(--color-dark-gray);
+}
+
+/* Cost Comparison Component (Beta 벤치마킹) */
+.cta-cost-comparison {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-6);
+  margin-bottom: var(--space-8);
+  padding: var(--space-6);
+  background: var(--color-white);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--color-border-gray);
+}
+
+.cost-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.cost-label {
+  font-size: var(--font-xs);
+  color: var(--color-medium-gray);
+  font-weight: 500;
+}
+
+.cost-value {
+  font-size: var(--font-xl);
+  color: var(--color-black);
+}
+
+.cost-value strong {
+  font-size: var(--font-2xl);
+  font-weight: 700;
+}
+
+.cost-touchad .cost-value {
+  color: var(--color-black);
+}
+
+.cost-touchad .cost-value strong {
+  color: #2d8c3c;
+}
+
+.cost-period {
+  font-size: var(--font-xs);
+  color: var(--color-light-gray);
+}
+
+.cost-divider {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-2);
+}
+
+.cost-vs {
+  font-size: var(--font-sm);
+  font-weight: 700;
+  color: var(--color-light-gray);
+}
+
+.cost-naver .cost-value {
+  color: var(--color-light-gray);
+}
+
+.cost-strikethrough {
+  text-decoration: line-through;
+}
+
+.cost-badge {
+  background: #2d8c3c;
+  color: var(--color-white);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+@media (max-width: 720px) {
+  .cta-cost-comparison {
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  
+  .cost-divider {
+    padding: var(--space-2) 0;
+  }
+}
+
+/* =========================================================
+   Responsive: 5-Stage Layout
+ ========================================================= */
+@media (max-width: 960px) {
+  .kpi-hero-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .kpi-hero-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+  
+  .kpi-hero-row {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+  
+  .kpi-hero-card {
+    min-height: 140px;
+  }
+  
+  .kpi-hero-value {
+    font-size: var(--font-2xl);
+  }
+  
+  .interpretation-card {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .gpt-insight-card {
+    padding: var(--space-6);
+  }
+  
+  .single-cta-card {
+    padding: var(--space-6);
+  }
+  
+  .single-cta-btn {
+    width: 100%;
+    padding: var(--space-4);
+  }
+}
+
 /* ---------------------------------------------------------
    1. Header Area
    --------------------------------------------------------- */
