@@ -166,7 +166,7 @@
       { resData: sampleData.resData, dunjugoValues: sampleData.dunjugoValues }
     );
 
-    window.location.href = '/touch/newresult.html';
+    window.location.href = '/services/touch/newresult.html';
   }
 
   /**
@@ -304,7 +304,7 @@
           }
         );
 
-        window.location.href = '/touch/newresult.html';
+        window.location.href = '/services/touch/newresult.html';
       }
     } catch (err) {
       console.error('런컴 API 호출 오류:', err);

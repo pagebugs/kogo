@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // Load Header
   if (headerPlaceholder) {
-    fetch('../inc/header.html')
+    fetch('/inc/header.html')
       .then(response => {
         if (!response.ok) throw new Error("Header load failed");
         return response.text();
@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // Load Footer
   if (footerPlaceholder) {
-    fetch('../inc/footer.html')
+    fetch('/inc/footer.html')
       .then(response => {
         if (!response.ok) throw new Error("Footer load failed");
         return response.text();

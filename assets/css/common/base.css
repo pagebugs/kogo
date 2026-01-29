@@ -1,0 +1,261 @@
+/* =========================================================
+   RESET & BASE
+ ========================================================= */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family-base);
+  color: var(--color-black);
+  background: var(--color-white);
+  line-height: var(--lh-base);
+  
+  /* Allow normal page scrolling by default. */
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+/* Only snap-scroll pages should lock window scroll. */
+body.snap-scroll {
+  overflow: hidden;
+}
+
+/* 반전 상태 (Theme Invert / Dark Mode) */
+body.theme-invert {
+  /* Redefine global tokens for dark mode */
+  --color-black: oklch(100% 0 0);       /* Was Black -> Now White */
+  --color-white: oklch(0% 0 0);         /* Was White -> Now Black */
+  
+  --color-dark-gray: oklch(80% 0 0);    /* Lighten for dark mode text */
+  --color-medium-gray: oklch(65% 0 0);  /* Adjust mid-tones */
+  
+  --color-bg-gray: oklch(15% 0 0);      /* Was Light Gray BG -> Now Dark Gray BG */
+  --color-border-gray: oklch(25% 0 0);  /* Darker border */
+}
+
+/* Scroll Container (Main Scroll Context) */
+.scroll-container {
+  height: 100vh;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+
+/* Scroll Snap Alignment for Sections */
+section, .section, .hero, .partners, .benefit, .simulator {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* =========================================================
+   GRID SYSTEM
+   12-column grid based on container width
+ ========================================================= */
+.container {
+  width: 100%;
+  max-width: var(--container-width);
+  margin: 0 auto;
+  padding: 0 var(--container-padding);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--grid-gap);
+}
+
+/* Grid column spans */
+.col-1 { grid-column: span 1; }
+.col-2 { grid-column: span 2; }
+.col-3 { grid-column: span 3; }
+.col-4 { grid-column: span 4; }
+.col-5 { grid-column: span 5; }
+.col-6 { grid-column: span 6; }
+.col-7 { grid-column: span 7; }
+.col-8 { grid-column: span 8; }
+.col-9 { grid-column: span 9; }
+.col-10 { grid-column: span 10; }
+.col-11 { grid-column: span 11; }
+.col-12 { grid-column: span 12; }
+
+/* =========================================================
+   TYPOGRAPHY UTILITIES
+ ========================================================= */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-weight: 600;
+  font-family: var(--font-family-heading);
+  line-height: var(--lh-heading);
+}
+
+h1 { font-size: var(--font-3xl); }
+h2 { font-size: var(--font-2xl); }
+h3 { font-size: var(--font-xl); }
+h4 { font-size: var(--font-lg); }
+
+p {
+  margin: 0 0 var(--space-4) 0;
+  color: var(--color-medium-gray);
+}
+
+p:last-child {
+  margin-bottom: 0;
+}
+
+.text-small { font-size: var(--font-xs); }
+.text-base { font-size: var(--font-base); }
+.text-medium { font-size: var(--font-md); }
+
+.text-muted {
+  color: var(--color-medium-gray);
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* =========================================================
+   COMPONENTS
+ ========================================================= */
+
+/* Button */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3) var(--space-6);
+  font-size: var(--font-base);
+  font-weight: 500;
+  border-radius: var(--border-radius);
+  border: 2px solid var(--color-black);
+  background: var(--color-black);
+  color: var(--color-white);
+  transition: var(--transition);
+}
+
+.btn:hover {
+  background: var(--color-white);
+  color: var(--color-black);
+}
+
+.btn-outline {
+  background: var(--color-white);
+  color: var(--color-black);
+}
+
+.btn-outline:hover {
+  background: var(--color-black);
+  color: var(--color-white);
+}
+
+/* Card */
+.card {
+  padding: var(--space-8);
+  background: var(--color-white);
+  border: 1px solid var(--color-border-gray);
+  border-radius: var(--border-radius);
+}
+
+/* Section */
+.section {
+  padding: var(--space-16) 0;
+}
+
+
+/* Modal */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 10000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.5);
+  align-items: center;
+  justify-content: center;
+}
+
+.modal__content {
+  background-color: var(--color-white);
+  padding: var(--space-8);
+  border: 1px solid var(--color-border-gray);
+  border-radius: var(--border-radius);
+  width: 100%;
+  max-width: 600px;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.modal-close {
+  color: var(--color-medium-gray);
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.modal-close:hover,
+.modal-close:focus {
+  color: var(--color-black);
+  text-decoration: none;
+}
+
+/* Form Styles inside Modal */
+.address-search-group {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+}
+
+.search-input {
+  flex: 1;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border-gray);
+  border-radius: var(--border-radius);
+  font-size: var(--font-base);
+}
+
+.search-button {
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-black);
+  color: var(--color-white);
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: var(--font-sm);
+  white-space: nowrap;
+}
+
+.modal-form-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
